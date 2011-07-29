@@ -1,6 +1,6 @@
 <html>
     <head>
-        <title>Snippet</title>
+        <title>{{ name }}</title>
         
         <meta http-equiv="content-type" content="text/html; charset=latin1">
         <link href="{{ static_url("hl.css") }}" media="screen, projection" rel="stylesheet" type="text/css">
@@ -29,6 +29,9 @@
             <div id="d_clip_button" class="my_clip_button"><b>Copy To Clipboard...</b></div>
         </div>
         <div style="padding-bottom:100px;">Public Link: <a id="publink" href="http://snip.hunterlang.com/{{id}}">http://snip.hunterlang.com/{{id}}</a></div>
+        {% if forked_from is not None %}
+            <div style="padding-bottom:100px;">Forked From: <a id="forklink" href="http://snip.hunterlang.com/{{forked_from}}">http://snip.hunterlang.com/{{forked_from}}</a></div>
+        {% end %}
         {{ code_html }}        
         
     </body>
