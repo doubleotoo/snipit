@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright 2011 Hunter Lang
+# Copyright 2011 Hunter Lang, Avi Romanoff I
 #
 # MIT License
 import logging
 import base64
 import re
 import os.path
-import sqlite3
 import uuid
 import string
 import random
@@ -22,6 +21,15 @@ from pygments import highlight
 from pygments.lexers import *
 from pygments.formatters import HtmlFormatter
 from pygments.styles import get_style_by_name
+from pymongo import Connection
+from pymongo.objectid import ObjectId
+
+MONGO_SERVER = "localhost"
+MONGO_PORT = 27017
+
+connection = Connection(MONGO_SERVER, MONGO_PORT)
+db = connection['struts'] # ~= database name
+snippets = db['snippets'] # ~= database table
 
 define("port", default=8888, help="run on the given port", type=int)
 
@@ -40,51 +48,43 @@ class Application(tornado.web.Application):
             login_url = "/login",
             xsrf_cookies = True,
         )
-        tornado.web.Application.__init__(self, handlers, autoescape=None, **settings)   #Disables auto escape in templates so xsrf works
+        tornado.web.Application.__init__(self, handlers, autoescape=None, **settings) # Disables auto escape in templates so xsrf works
 
 
 class IndexHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def get(self):
         self.render("static/index.html")
+
 class UploadHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def post(self):
-        db = sqlite3.connect("db.db")
-        dbc = db.cursor()
         file_content = self.request.files['file'][0]
         file_body = file_content['body']
         file_name = file_content['filename']
         lexer = guess_lexer(file_body)
         print lexer
         html = highlight(file_body, lexer, HtmlFormatter())
-        _id = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase  + string.digits) for x in range(randint(5,10)))
-        dbc.execute("insert into snippet values (?,?,?,?,?)", [unicode(file_body, 'utf-8'), file_name, None, None, _id])
-        db.commit()
-        dbc.close()
-        db.close()
+        # It's schemaless, so we don't need to specify null values for unused fields.
+        _id = snippets.insert({'title': file_name, 'body' : unicode(file_body, 'utf-8')})
         self.render("static/upload.html", lexer=lexer.__class__, code_html=html, id = _id)
+
 class ViewHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
-    def get(self, id):
-        db = sqlite3.connect("db.db")
-        dbc = db.cursor()
-        dbc.execute("select body, name, description, password from snippet where id=?", [id])
-        results = dbc.fetchone()
-        if not results:
-            self.finish("Snippet not found.")
-            return
-        body = results[0]
-        name = results[1]
-        description = results[2]
-        password = results[3]
-        lexer = guess_lexer(body)
-        html = highlight(body, lexer, HtmlFormatter())        
-        self.render("static/view.html", name = name, code_html = html, description = description)
+    def get(self, __id):
+        # Yes, the mongodb ObjectId is really _id in PyMongo..
+        snippet = snippets.find_one({'_id' : ObjectId(__id)})
+        lexer = guess_lexer(snippet['body'])
+        html = highlight(snippet['body'], lexer, HtmlFormatter())        
+        # Description is missing since mongo can't handle the truth (that the dict
+        # key doesn't exist).
+        self.render("static/view.html", name = snippet['title'], code_html = html, description = None)
+
 def main():
    	tornado.options.parse_command_line()
-   	http_server = tornado.httpserver.HTTPServer(Application(), xheaders=True)      #enables headers so it can be run behind nginx
+   	http_server = tornado.httpserver.HTTPServer(Application(), xheaders=True) # enables headers so it can be run behind nginx
    	http_server.listen(options.port)
    	tornado.ioloop.IOLoop.instance().start()
+
 if __name__ == "__main__":
     main()
