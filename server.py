@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright 2011 Hunter Lang, Avi Romanoff I
+# Copyright 2011 Hunter Lang, Avi Romanoff XVII
 #
 # MIT License
 import logging
@@ -63,13 +63,16 @@ class ViewHandler(tornado.web.RequestHandler):
     def get(self, __id):
         # Yes, the mongodb ObjectId is really _id in PyMongo..
         snippet = snippets.find_one({'_id' : ObjectId(__id)})
-        print snippet
         lexer = guess_lexer(snippet['body'])
         html = highlight(snippet['body'], lexer, HtmlFormatter())        
         snippet = snippets.find_one({"_id" : ObjectId(__id)})
         # I'm pretty sure there's an official count method, but I don't see why we 
         # would use it, since this is awesomely simple.
-        fork_count = len(snippet['forks'])
+        
+        #threw in this if-else because a key error was being thrown if the snippet dict didn't have a forks key.
+        #I'm not sure how a snippet object was created without a forks key, but this fixes the issue for now.
+        if "forks" in snippet.keys():fork_count = len(snippet['forks'])
+        else: fork_count = 0
         self.render("static/view.html", name = snippet['title'], code_html = html, description = None, id=__id, fork_count = fork_count)
 
 class ForkHandler(tornado.web.RequestHandler):
