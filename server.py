@@ -4,13 +4,9 @@
 #
 # MIT License
 import logging
-import base64
 import re
+import sys
 import os.path
-import uuid
-import string
-import random
-from random import randint
 import tornado.httpserver
 import tornado.ioloop
 import tornado.options
@@ -23,15 +19,10 @@ from pygments.formatters import HtmlFormatter
 from pygments.styles import get_style_by_name
 from pymongo import Connection
 from pymongo.objectid import ObjectId
-
-MONGO_SERVER = ""
-MONGO_PORT = 27017
-
-connection = Connection(MONGO_SERVER, MONGO_PORT)
-db = connection['struts'] # ~= database name
-snippets = db['snippets'] # ~= database table
+from pymongo.errors import ConfigurationError
 
 define("port", default=8888, help="run on the given port", type=int)
+define("password", default=None, help="MongoDB password", type=str, metavar="PASSWORD")
 
 # This defines the applications routes
 class Application(tornado.web.Application):
@@ -102,10 +93,21 @@ class ForkHandler(tornado.web.RequestHandler):
         _id = snippets.insert({'title': name, 'body' : unicode(text, 'utf-8'), 'forked_from': parent_id})
         self.render("static/upload.html", name=name,code_html=html, id = _id, forked_from = parent_id,fork_count=0)
 def main():
-   	tornado.options.parse_command_line()
-   	http_server = tornado.httpserver.HTTPServer(Application(), xheaders=True) # enables headers so it can be run behind nginx
-   	http_server.listen(options.port)
-   	tornado.ioloop.IOLoop.instance().start()
+    http_server = tornado.httpserver.HTTPServer(Application(), xheaders=True) # enables headers so it can be run behind nginx
+    http_server.listen(options.port)
+    logging.info("Serving on port %s" % options.port)
+    tornado.ioloop.IOLoop.instance().start()
 
 if __name__ == "__main__":
+    tornado.options.parse_command_line()
+    MONGO_SERVER = "mongodb://aroman:%s@dbh22.mongolab.com:27227/struts" % options.password
+    try:
+        connection = Connection(MONGO_SERVER)
+        db = connection['struts'] # ~= database name
+        snippets = db['snippets'] # ~= database table
+        logging.info("Connected to database")
+    except ConfigurationError:
+        logging.critical("Can't connect to database with password \"%s\"" % options.password)
+        # Terminate program with error return code.
+        sys.exit(1)
     main()
