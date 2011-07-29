@@ -64,20 +64,21 @@ class ViewHandler(tornado.web.RequestHandler):
         # Yes, the mongodb ObjectId is really _id in PyMongo..
         snippet = snippets.find_one({'_id' : ObjectId(__id)})
         lexer = guess_lexer(snippet['body'])
-        html = highlight(snippet['body'], lexer, HtmlFormatter())        
-        snippet = snippets.find_one({"_id" : ObjectId(__id)})
+        html = highlight(snippet['body'], lexer, HtmlFormatter())
 
-
-        #####ADD GETTING THE PARENT FROM THE CHILD HERE###
-        
+        parent_snippet = snippets.find_one({"forks" : {"$in" : [snippet['_id']]}})
+        print parent_snippet
+        if parent_snippet:
+            forked_from_id = parent_snippet['_id']
+        else:
+            forked_from_id = "{{([({{'"'(None)'"'}})])}}"
         # I'm pretty sure there's an official count method, but I don't see why we 
         # would use it, since this is awesomely simple.
         
         #threw in this if-else because a key error was being thrown if the snippet dict didn't have a forks key.
         #I'm not sure how a snippet object was created without a forks key, but this fixes the issue for now.
-        if "forks" in snippet.keys():fork_count = len(snippet['forks'])
-        else: fork_count = 0
-        self.render("static/view.html", name = snippet['title'], code_html = html, description = None, id=__id, fork_count = fork_count)
+        fork_count = len(snippet['forks'])
+        self.render("static/view.html", name = snippet['title'], code_html = html, description = None, id=__id, fork_count = fork_count, forked_from = forked_from_id)
 
 class ForkHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
@@ -92,7 +93,7 @@ class ForkHandler(tornado.web.RequestHandler):
         parent_id = __id
         lexer = guess_lexer(text)
         html = highlight(text, lexer, HtmlFormatter())
-        _id = snippets.insert({'title': name, 'body': unicode(text, 'utf-8')})
+        _id = snippets.insert({'title': name, 'body': unicode(text, 'utf-8'), 'forks' : []})
         # `safe` turns on error-checking for the update request, so we print out the response.
         print snippets.update({'_id': ObjectId(parent_id)}, {"$push": {"forks" : ObjectId(_id)}}, safe=True)
         self.render("static/upload.html", name=name, code_html=html, id = _id, forked_from = parent_id, fork_count=0)
@@ -105,7 +106,7 @@ def main():
 
 if __name__ == "__main__":
     tornado.options.parse_command_line()
-    MONGO_SERVER = "mongodb://aroman:%s@dbh22.mongolab.com:27227/struts" % options.password
+    MONGO_SERVER = "mongodb://aroman:%s@dbh23.mongolab.com:27237/struts" % options.password
     try:
         connection = Connection(MONGO_SERVER)
         db = connection['struts'] # ~= database name
