@@ -24,7 +24,7 @@ from pygments.styles import get_style_by_name
 from pymongo import Connection
 from pymongo.objectid import ObjectId
 
-MONGO_SERVER = "localhost"
+MONGO_SERVER = "this is a secret. sorry."
 MONGO_PORT = 27017
 
 connection = Connection(MONGO_SERVER, MONGO_PORT)
@@ -39,13 +39,13 @@ class Application(tornado.web.Application):
         handlers = [
 			(r"/", IndexHandler),
 			(r"/upload", UploadHandler),
-			(r"/([A-Za-z0-9]+)", ViewHandler)
+			(r"/([A-Za-z0-9]+)", ViewHandler),
+			(r"/fork/([A-Za-z0-9]+)", ForkHandler)
         ]
         
         settings = dict(
             static_path = os.path.join(os.path.dirname(__file__), "static"),
             cookie_secret = "72-OrTzKXeAGaYdkL5gEmGeKSFumh7Ec+p2XdTP1o/Vo=",
-            login_url = "/login",
             xsrf_cookies = True,
         )
         tornado.web.Application.__init__(self, handlers, autoescape=None, **settings) # Disables auto escape in templates so xsrf works
@@ -78,7 +78,15 @@ class ViewHandler(tornado.web.RequestHandler):
         html = highlight(snippet['body'], lexer, HtmlFormatter())        
         # Description is missing since mongo can't handle the truth (that the dict
         # key doesn't exist).
-        self.render("static/view.html", name = snippet['title'], code_html = html, description = None)
+        self.render("static/view.html", name = snippet['title'], code_html = html, description = None, id=__id)
+
+class ForkHandler(tornado.web.RequestHandler):
+    @tornado.web.asynchronous
+    def get(self, __id):
+        snippet_to_be_forked = snippets.find_one({'_id' : ObjectId(__id)})
+        raw_text = snippet_to_be_forked['body']
+        name = "Fork of " + snippet_to_be_forked['title']
+        self.render("static/fork.html", name=name, raw_text=raw_text)
 
 def main():
    	tornado.options.parse_command_line()

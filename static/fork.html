@@ -5,13 +5,8 @@
         <link href="{{ static_url("hl.css") }}" media="screen, projection" rel="stylesheet" type="text/css">
     </head>
     <body style="">
-        <a class="my_clip_button" href="/fork/{{ id }}">Fork This Snippet</a>
-        {{ code_html }}
         
-        <div style="padding-top:100px;">
-        {% if description is not None %}
-            {{ description }}
-        {% end %}
-        </div>
+        <textarea style="width:auto;height:auto;">{{ raw_text }}</textarea>
+        <button class="my_clip_button">Fork</button>
     </body>
 </html>
