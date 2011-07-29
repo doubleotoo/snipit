@@ -66,6 +66,10 @@ class ViewHandler(tornado.web.RequestHandler):
         lexer = guess_lexer(snippet['body'])
         html = highlight(snippet['body'], lexer, HtmlFormatter())        
         snippet = snippets.find_one({"_id" : ObjectId(__id)})
+
+
+        #####ADD GETTING THE PARENT FROM THE CHILD HERE###
+        
         # I'm pretty sure there's an official count method, but I don't see why we 
         # would use it, since this is awesomely simple.
         
