@@ -30,8 +30,10 @@ class Application(tornado.web.Application):
         handlers = [
 			(r"/", IndexHandler),
 			(r"/upload", UploadHandler),
+			(r"/stats", StatsHandler),
 			(r"/([A-Za-z0-9]+)", ViewHandler),
-			(r"/fork/([A-Za-z0-9]+)", ForkHandler)
+			(r"/fork/([A-Za-z0-9]+)", ForkHandler),
+			
         ]
         
         settings = dict(
@@ -67,7 +69,6 @@ class ViewHandler(tornado.web.RequestHandler):
         html = highlight(snippet['body'], lexer, HtmlFormatter())
 
         parent_snippet = snippets.find_one({"forks" : {"$in" : [snippet['_id']]}})
-        print parent_snippet
         if parent_snippet:
             forked_from_id = parent_snippet['_id']
         else:
@@ -97,6 +98,17 @@ class ForkHandler(tornado.web.RequestHandler):
         # `safe` turns on error-checking for the update request, so we print out the response.
         print snippets.update({'_id': ObjectId(parent_id)}, {"$push": {"forks" : ObjectId(_id)}}, safe=True)
         self.render("static/upload.html", name=name, code_html=html, id = _id, forked_from = parent_id, fork_count=0)
+
+class StatsHandler(tornado.web.RequestHandler):
+    @tornado.web.asynchronous
+    def get(self):
+        top_snippets = []
+        for snippet in snippets.find():
+            top_snippets.append([len(snippet['forks']), snippet['title'], snippet['_id']])
+        top_snippets.sort()
+        top_snippets = top_snippets[0:10]
+        top_snippets.reverse()
+        self.render("static/stats.html", top_snippets=top_snippets)
 
 def main():
     http_server = tornado.httpserver.HTTPServer(Application(), xheaders=True) # enables headers so it can be run behind nginx
