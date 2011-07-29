@@ -28,9 +28,13 @@
         <div id="d_clip_container" style="position:relative">
             <div id="d_clip_button" class="my_clip_button"><b>Copy To Clipboard...</b></div>
         </div>
-        <div style="padding-bottom:100px;">Public Link: <a id="publink" href="http://snip.hunterlang.com/{{id}}">http://snip.hunterlang.com/{{id}}</a></div>
+        
         {% if forked_from is not None %}
-            <div style="padding-bottom:100px;">Forked From: <a id="forklink" href="http://snip.hunterlang.com/{{forked_from}}">http://snip.hunterlang.com/{{forked_from}}</a></div>
+            <div>Public Link: <a id="publink" href="http://snip.hunterlang.com/{{id}}">http://snip.hunterlang.com/{{id}}</a></div>
+            <div style="padding-bottom:100px;">Forked From: <a id="forklink" href="http://snip.hunterlang.com/{{forked_from}}">{{forked_from}}</a></div>
+        {% end %}
+        {% if forked_from is None %}
+            <div style="padding-bottom:100px;">Public Link: <a id="publink" href="http://snip.hunterlang.com/{{id}}">http://snip.hunterlang.com/{{id}}</a></div>
         {% end %}
         {{ code_html }}        
         

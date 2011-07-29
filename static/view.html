@@ -8,7 +8,9 @@
         <a class="my_clip_button" href="/fork/{{ id }}">Fork This Snippet</a>
         {{ fork_count }} forks.
         <br />
-        <div style="padding-bottom:100px;">Forked From: <a id="forklink" href="http://snip.hunterlang.com/{{forked_from}}">http://snip.hunterlang.com/{{forked_from}}</a> with love.</div>
+        {% if forked_from is not None %}
+            <div style="padding-top:15px;padding-bottom:10px;">Forked From: <a id="forklink" href="http://snip.hunterlang.com/{{forked_from}}">{{forked_from}}</a></div>
+        {% end %}
         {{ code_html }}
         
         <div style="padding-top:100px;">

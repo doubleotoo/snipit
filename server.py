@@ -71,7 +71,7 @@ class ViewHandler(tornado.web.RequestHandler):
         if parent_snippet:
             forked_from_id = parent_snippet['_id']
         else:
-            forked_from_id = "{{([({{'"'(None)'"'}})])}}"
+            forked_from_id = None
         # I'm pretty sure there's an official count method, but I don't see why we 
         # would use it, since this is awesomely simple.
         
