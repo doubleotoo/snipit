@@ -14,9 +14,7 @@
 {% block bodyhooks %} onLoad="init()" {% end %}
 {% block body %}
     <script type="text/javascript">
-        // Really ought to use the static_url here, but I'm assuming you didn't
-        // for a reason.
-        ZeroClipboard.setMoviePath( '/static/copytoclip/ZeroClipboard.swf' );
+        ZeroClipboard.setMoviePath( '{{ static_url("copytoclip/ZeroClipboard.swf") }}' );
         var clip = null;		
         function init() {
             clip = new ZeroClipboard.Client();
