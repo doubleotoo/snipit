@@ -96,6 +96,9 @@ class ForkHandler(tornado.web.RequestHandler):
 class StatsHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def get(self):
+        # right now this makes a list of *every* snippet. this is obviously inefficient.
+        # we need to find a way to query directly with mongo and limit to 10 results.
+        
         top_snippets = []
         for snippet in snippets.find():
             top_snippets.append([len(snippet['forks']), snippet['title'], snippet['_id']])
