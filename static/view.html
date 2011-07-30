@@ -11,8 +11,9 @@
         {% if forked_from is not None %}
             <div style="padding-top:15px;padding-bottom:10px;">Forked From: <a id="forklink" href="http://snip.hunterlang.com/{{forked_from}}">{{forked_from}}</a></div>
         {% end %}
-        {{ code_html }}
-        
+        <div id="code_container" style="height:400px; width:auto;overflow:auto;margin-top:50px;border-top:solid 1px #ccc; border-bottom: solid 1px #ccc">
+            {{ code_html }}
+        </div>
         <div style="padding-top:100px;">
         {% if description is not None %}
             {{ description }}

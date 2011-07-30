@@ -30,6 +30,7 @@ class Application(tornado.web.Application):
         handlers = [
 			(r"/", IndexHandler),
 			(r"/upload", UploadHandler),
+			(r"/paste", PasteHandler),
 			(r"/stats", StatsHandler),
 			(r"/([A-Za-z0-9]+)", ViewHandler),
 			(r"/fork/([A-Za-z0-9]+)", ForkHandler),
@@ -60,6 +61,16 @@ class UploadHandler(tornado.web.RequestHandler):
         _id = snippets.insert({'title': file_name, 'body' : unicode(file_body, 'utf-8'), 'forks' : []})
         self.render("static/upload.html", name=file_name, code_html=html, id = _id, forked_from = None)
 
+class PasteHandler(tornado.web.RequestHandler):
+    @tornado.web.asynchronous
+    def post(self):
+        file_body = self.request.arguments['body'][0]
+        file_name = self.request.arguments['name'][0]
+        lexer = guess_lexer(file_body)
+        html = highlight(file_body, lexer, HtmlFormatter())
+        # It's schemaless, so we don't need to specify null values for unused fields.
+        _id = snippets.insert({'title': file_name, 'body' : unicode(file_body, 'utf-8'), 'forks' : []})
+        self.render("static/upload.html", name=file_name, code_html=html, id = _id, forked_from = None)
 class ViewHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def get(self, __id):
