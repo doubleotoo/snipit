@@ -1,42 +1,41 @@
-<html>
-    <head>
-        <title>{{ name }}</title>
-        
-        <meta http-equiv="content-type" content="text/html; charset=latin1">
-        <link href="{{ static_url("hl.css") }}" media="screen, projection" rel="stylesheet" type="text/css">
-        <script type="text/javascript" src="{{ static_url("copytoclip/copy.js") }}"></script>
-        <style type="text/css">
-            body { font-family:arial,sans-serif; font-size:9pt; }
-            .my_clip_button { width:150px; text-align:center; border:1px solid black; background-color:#ccc; margin:10px; padding:10px; cursor:default; font-size:9pt; }
-            .my_clip_button.hover { background-color:#eee; }
-            .my_clip_button.active { background-color:#aaa; }
-        </style>
+{% extends "base.html" %}
 
-    </head>
-    <body onLoad="init()">
-        <script type="text/javascript">
-            ZeroClipboard.setMoviePath( '/static/copytoclip/ZeroClipboard.swf' );
-            var clip = null;		
-            function init() {
-                clip = new ZeroClipboard.Client();
-                clip.setHandCursor( true );
-                clip.glue( 'd_clip_button', 'd_clip_container' );
-                clip.setText("http://snip.hunterlang.com/{{id}}");
-            }
-        </script>
+{% block title %}{{ name }}{% end %}
+{% block head %}
+    <link href="{{ static_url("hl.css") }}" media="screen, projection" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="{{ static_url("copytoclip/copy.js") }}"></script>
+    <style type="text/css">
+        body { font-family:arial,sans-serif; font-size:9pt; }
+        .my_clip_button { width:150px; text-align:center; border:1px solid black; background-color:#ccc; margin:10px; padding:10px; cursor:default; font-size:9pt; }
+        .my_clip_button.hover { background-color:#eee; }
+        .my_clip_button.active { background-color:#aaa; }
+    </style>
+{% end %}
+{% block bodyhooks %} onLoad="init()" {% end %}
+{% block body %}
+    <script type="text/javascript">
+        // Really ought to use the static_url here, but I'm assuming you didn't
+        // for a reason.
+        ZeroClipboard.setMoviePath( '/static/copytoclip/ZeroClipboard.swf' );
+        var clip = null;		
+        function init() {
+            clip = new ZeroClipboard.Client();
+            clip.setHandCursor( true );
+            clip.glue( 'd_clip_button', 'd_clip_container' );
+            clip.setText("{{ SITE_ROOT }}/{{id}}");
+        }
+    </script>
 
-        <div id="d_clip_container" style="position:relative">
-            <div id="d_clip_button" class="my_clip_button"><b>Copy To Clipboard...</b></div>
-        </div>
-        
-        {% if forked_from is not None %}
-            <div>Public Link: <a id="publink" href="http://snip.hunterlang.com/{{id}}">http://snip.hunterlang.com/{{id}}</a></div>
-            <div style="padding-bottom:100px;">Forked From: <a id="forklink" href="http://snip.hunterlang.com/{{forked_from}}">{{forked_from}}</a></div>
-        {% end %}
-        {% if forked_from is None %}
-            <div style="padding-bottom:100px;">Public Link: <a id="publink" href="http://snip.hunterlang.com/{{id}}">http://snip.hunterlang.com/{{id}}</a></div>
-        {% end %}
-        {{ code_html }}        
-        
-    </body>
-</html>
+    <div id="d_clip_container" style="position:relative">
+        <div id="d_clip_button" class="my_clip_button"><b>Copy To Clipboard...</b></div>
+    </div>
+    
+    {% if forked_from is not None %}
+        <div>Public Link: <a id="publink" href="{{id}}">{{ SITE_ROOT }}/{{id}}</a></div>
+        <div style="padding-bottom:100px;">Forked From: <a id="forklink" href="{{forked_from}}">{{forked_from}}</a></div>
+    {% else %}
+        <div style="padding-bottom:100px;">Public Link: <a id="publink" href="{{id}}">{{ SITE_ROOT }}/{{id}}</a></div>
+    {% end %}
+    {{ code_html }}        
+    
+{% end %}

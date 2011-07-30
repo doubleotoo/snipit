@@ -1,22 +1,24 @@
-<html>
-    <head>
-        <title>{{ name }}</title>
-        <meta http-equiv="content-type" content="text/html; charset=latin1">
-        <link href="{{ static_url("hl.css") }}" media="screen, projection" rel="stylesheet" type="text/css">
-    </head>
-    <body style="">
-        <a class="my_clip_button" href="/fork/{{ id }}">Fork This Snippet</a>
-        {{ fork_count }} forks.
-        <br />
-        {% if forked_from is not None %}
-            <div style="padding-top:15px;padding-bottom:10px;">Forked From: <a id="forklink" href="http://snip.hunterlang.com/{{forked_from}}">{{forked_from}}</a></div>
-        {% end %}
-        {{ code_html }}
-        
-        <div style="padding-top:100px;">
-        {% if description is not None %}
-            {{ description }}
-        {% end %}
-        </div>
-    </body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}{{ name }}{% end %}
+
+{% block head %}
+    <link href="{{ static_url("hl.css") }}" media="screen, projection" rel="stylesheet" type="text/css">
+{% end %}
+
+{% block bodyhooks %} style="" {% end %}
+{% block body %}
+    <a class="my_clip_button" href="/fork/{{ id }}">Fork This Snippet</a>
+    {{ fork_count }} forks.
+    <br />
+    {% if forked_from is not None %}
+        <div style="padding-top:15px;padding-bottom:10px;">Forked From: <a id="forklink" href="{{ SITE_ROOT }}/{{forked_from}}">{{forked_from}}</a></div>
+    {% end %}
+    {{ code_html }}
+    
+    <div style="padding-top:100px;">
+    {% if description is not None %}
+        {{ description }}
+    {% end %}
+    </div>
+{% end %}
