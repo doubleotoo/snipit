@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright 2011 Hunter Lang, Avi Romanoff XVII
+# Copyright 2011 Hunter Lang, Avi Romanoff -XVII
 #
 # MIT License
 import logging
@@ -67,17 +67,11 @@ class ViewHandler(tornado.web.RequestHandler):
         snippet = snippets.find_one({'_id' : ObjectId(__id)})
         lexer = guess_lexer(snippet['body'])
         html = highlight(snippet['body'], lexer, HtmlFormatter())
-
         parent_snippet = snippets.find_one({"forks" : {"$in" : [snippet['_id']]}})
         if parent_snippet:
             forked_from_id = parent_snippet['_id']
         else:
             forked_from_id = None
-        # I'm pretty sure there's an official count method, but I don't see why we 
-        # would use it, since this is awesomely simple.
-        
-        #threw in this if-else because a key error was being thrown if the snippet dict didn't have a forks key.
-        #I'm not sure how a snippet object was created without a forks key, but this fixes the issue for now.
         fork_count = len(snippet['forks'])
         self.render("static/view.html", name = snippet['title'], code_html = html, description = None, id=__id, fork_count = fork_count, forked_from = forked_from_id)
 
