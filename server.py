@@ -100,8 +100,8 @@ class StatsHandler(tornado.web.RequestHandler):
         for snippet in snippets.find():
             top_snippets.append([len(snippet['forks']), snippet['title'], snippet['_id']])
         top_snippets.sort()
-        top_snippets = top_snippets[0:10]
         top_snippets.reverse()
+        top_snippets = top_snippets[0:10]
         self.render("static/stats.html", top_snippets=top_snippets)
 
 def main():
