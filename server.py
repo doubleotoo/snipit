@@ -47,7 +47,7 @@ class Application(tornado.web.Application):
 class IndexHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def get(self):
-        self.render("static/index.html")
+        self.render("static/templates/index.html")
 
 class UploadHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
@@ -57,7 +57,7 @@ class UploadHandler(tornado.web.RequestHandler):
         file_name = file_content['filename']
         # It's schemaless, so we don't need to specify null values for unused fields.
         _id = snippets.insert({'title': file_name, 'body' : unicode(file_body, 'utf-8'), 'forks' : []})
-        self.render("static/upload.html", name=file_name, code_html=file_body, id = _id, forked_from = None)
+        self.render("static/templates/upload.html", name=file_name, code_html=file_body, id = _id, forked_from = None)
 
 class PasteHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
@@ -65,7 +65,7 @@ class PasteHandler(tornado.web.RequestHandler):
         file_body = self.request.arguments['body'][0]
         file_name = self.request.arguments['name'][0]
         _id = snippets.insert({'title': file_name, 'body' : unicode(file_body, 'utf-8'), 'forks' : []})
-        self.render("static/upload.html", name=file_name, code_html=file_body, id = _id, forked_from = None)
+        self.render("static/templates/upload.html", name=file_name, code_html=file_body, id = _id, forked_from = None)
 class ViewHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def get(self, __id):
@@ -77,7 +77,7 @@ class ViewHandler(tornado.web.RequestHandler):
         else:
             forked_from_id = None
         fork_count = len(snippet['forks'])
-        self.render("static/view.html", name = snippet['title'], code_html = snippet['body'], description = None, id=__id, fork_count = fork_count, forked_from = forked_from_id)
+        self.render("static/templates/view.html", name = snippet['title'], code_html = snippet['body'], description = None, id=__id, fork_count = fork_count, forked_from = forked_from_id)
 
 class ForkHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
@@ -85,7 +85,7 @@ class ForkHandler(tornado.web.RequestHandler):
         snippet_to_be_forked = snippets.find_one({'_id' : ObjectId(__id)})
         raw_text = snippet_to_be_forked['body']
         name = "Fork of " + snippet_to_be_forked['title']
-        self.render("static/fork.html", name=name, raw_text=raw_text, id=__id)
+        self.render("static/templates/fork.html", name=name, raw_text=raw_text, id=__id)
     def post(self, __id):
         text = self.request.arguments['body'][0]
         name = self.request.arguments['name'][0]
@@ -93,7 +93,7 @@ class ForkHandler(tornado.web.RequestHandler):
         _id = snippets.insert({'title': name, 'body': unicode(text, 'utf-8'), 'forks' : []})
         # `safe` turns on error-checking for the update request, so we print out the response.
         print snippets.update({'_id': ObjectId(parent_id)}, {"$push": {"forks" : ObjectId(_id)}}, safe=True)
-        self.render("static/upload.html", name=name, code_html=text, id = _id, forked_from = parent_id, fork_count=0)
+        self.render("static/templates/upload.html", name=name, code_html=text, id = _id, forked_from = parent_id, fork_count=0)
 
 class ViewForksHandler(tornado.web.RequestHandler):
 	@tornado.web.asynchronous
@@ -114,7 +114,7 @@ class StatsHandler(tornado.web.RequestHandler):
         top_snippets.sort()
         top_snippets.reverse()
         top_snippets = top_snippets[0:10]
-        self.render("static/stats.html", top_snippets=top_snippets)
+        self.render("static/templates/stats.html", top_snippets=top_snippets)
 
 def main():
     http_server = tornado.httpserver.HTTPServer(Application(), xheaders=True) # enables headers so it can be run behind nginx

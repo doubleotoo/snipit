@@ -2,8 +2,8 @@
 
 {% block title %}{{ name }}{% end %}
 {% block head %}
-    <script src="{{ static_url('codemirror.js') }}"></script>
-    <link href="{{ static_url('codemirror.css') }}" rel="stylesheet" type="text/css">
+    <script src="{{ static_url('js/codemirror.js') }}"></script>
+    <link href="{{ static_url('css/codemirror.css') }}" rel="stylesheet" type="text/css">
     <script type="text/javascript" src="{{ static_url("copytoclip/copy.js") }}"></script>
         <script type="text/javascript">
         ZeroClipboard.setMoviePath( '{{ static_url("copytoclip/ZeroClipboard.swf") }}' );
@@ -25,10 +25,10 @@
         
     </div>
     {% if forked_from is not None %}
-        <div style="margin-top:20px;">Public Link: <a id="publink" href="{{id}}">{{ SITE_ROOT }}/{{id}}</a></div>
+        <div style="margin-top:20px;">Public Link: <a id="publink" href="/{{id}}">{{ SITE_ROOT }}/{{id}}</a></div>
         <div>Forked From: <a id="forklink" href="/{{forked_from}}">{{forked_from}}</a></div>
     {% else %}
-        <div style="margin-top:20px;">Public Link: <a id="publink" href="{{id}}">{{ SITE_ROOT }}/{{id}}</a></div>
+        <div style="margin-top:20px;">Public Link: <a id="publink" href="/{{id}}">{{ SITE_ROOT }}/{{id}}</a></div>
     {% end %}
     
     </div>
