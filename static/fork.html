@@ -3,16 +3,30 @@
 {% block title %}{{ name }}{% end %}
 
 {% block head %}
-    <link href="{{ static_url("hl.css") }}" media="screen, projection" rel="stylesheet" type="text/css">
+    <script src="{{ static_url('codemirror.js') }}"></script>
+    <link href="{{ static_url('codemirror.css') }}" rel="stylesheet" type="text/css">
+    <link href="{{ static_url('default.css') }}" rel="stylesheet" type="text/css">
+    <link href="{{ static_url('hl.css') }}" media="screen, projection" rel="stylesheet" type="text/css">
 {% end %}
 
 {% block bodyhooks %} style="" {% end %}
 {% block body %}
     <form id="fork" method="post" enctype="multipart/form-data" action="/fork/{{ id }}">
-        <textarea  name="body" style="width:auto;height:auto;">{{ raw_text }}</textarea>
+        <textarea name="body" id="codebox" style="width:auto;height:auto;">{{ raw_text }}</textarea>
         <input type="hidden" name="name" value="{{ name }}">
         <br/>
         <input type="submit" class="my_clip_button" value="Fork"/>
        {{ xsrf_form_html() }}
     </form>
+
+    <script> 
+      var editor = CodeMirror.fromTextArea(document.getElementById("codebox"), {
+        lineNumbers: true
+      });
+        // For later use
+<!--      function selectTheme(node) {-->
+<!--        var theme = node.options[node.selectedIndex].innerHTML;-->
+<!--        editor.setOption("theme", theme);-->
+<!--      }-->
+    </script> 
 {% end %}

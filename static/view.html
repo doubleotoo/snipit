@@ -3,7 +3,10 @@
 {% block title %}{{ name }}{% end %}
 
 {% block head %}
-    <link href="{{ static_url("hl.css") }}" media="screen, projection" rel="stylesheet" type="text/css">
+    <script src="{{ static_url('codemirror.js') }}"></script>
+    <link href="{{ static_url('codemirror.css') }}" rel="stylesheet" type="text/css">
+    <link href="{{ static_url('default.css') }}" rel="stylesheet" type="text/css">
+    <link href="{{ static_url('hl.css') }}" media="screen, projection" rel="stylesheet" type="text/css">
 {% end %}
 
 {% block bodyhooks %} style="" {% end %}
@@ -14,13 +17,27 @@
     {% if forked_from is not None %}
         <div style="padding-top:15px;padding-bottom:10px;">Forked From: <a id="forklink" href="/{{forked_from}}">{{forked_from}}</a></div>
     {% end %}
-    <div id="code_container" style="height:400px; width:auto;overflow:auto;margin-top:50px;border-top:solid 1px #ccc; border-bottom: solid 1px #ccc">
-        {{ code_html }}
-    </div>
     
     <div style="padding-top:100px;">
     {% if description is not None %}
         {{ description }}
     {% end %}
     </div>
+
+    <div id="code_container" style="height:400px; width:auto;overflow:auto;margin-top:50px;border-top:solid 1px #ccc; border-bottom: solid 1px #ccc">
+        <textarea id="codebox">
+            {{ code_html }}
+        </textarea>
+    </div>
+
+    <script> 
+      var editor = CodeMirror.fromTextArea(document.getElementById("codebox"), {
+        lineNumbers: true
+      });
+        // For later use
+<!--      function selectTheme(node) {-->
+<!--        var theme = node.options[node.selectedIndex].innerHTML;-->
+<!--        editor.setOption("theme", theme);-->
+<!--      }-->
+    </script> 
 {% end %}

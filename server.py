@@ -56,35 +56,29 @@ class UploadHandler(tornado.web.RequestHandler):
         file_content = self.request.files['file'][0]
         file_body = file_content['body']
         file_name = file_content['filename']
-        lexer = guess_lexer(file_body)
-        html = highlight(file_body, lexer, HtmlFormatter())
         # It's schemaless, so we don't need to specify null values for unused fields.
         _id = snippets.insert({'title': file_name, 'body' : unicode(file_body, 'utf-8'), 'forks' : []})
-        self.render("static/upload.html", name=file_name, code_html=html, id = _id, forked_from = None)
+        self.render("static/upload.html", name=file_name, code_html=file_body, id = _id, forked_from = None)
+
 class PasteHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def post(self):
         file_body = self.request.arguments['body'][0]
         file_name = self.request.arguments['name'][0]
-        lexer = guess_lexer(file_body)
-        html = highlight(file_body, lexer, HtmlFormatter())
-        # It's schemaless, so we don't need to specify null values for unused fields.
         _id = snippets.insert({'title': file_name, 'body' : unicode(file_body, 'utf-8'), 'forks' : []})
-        self.render("static/upload.html", name=file_name, code_html=html, id = _id, forked_from = None)
+        self.render("static/upload.html", name=file_name, code_html=file_body, id = _id, forked_from = None)
 class ViewHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def get(self, __id):
         # Yes, the mongodb ObjectId is really _id in PyMongo..
         snippet = snippets.find_one({'_id' : ObjectId(__id)})
-        lexer = guess_lexer(snippet['body'])
-        html = highlight(snippet['body'], lexer, HtmlFormatter())
         parent_snippet = snippets.find_one({"forks" : {"$in" : [snippet['_id']]}})
         if parent_snippet:
             forked_from_id = parent_snippet['_id']
         else:
             forked_from_id = None
         fork_count = len(snippet['forks'])
-        self.render("static/view.html", name = snippet['title'], code_html = html, description = None, id=__id, fork_count = fork_count, forked_from = forked_from_id)
+        self.render("static/view.html", name = snippet['title'], code_html = snippet['body'], description = None, id=__id, fork_count = fork_count, forked_from = forked_from_id)
 
 class ForkHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
@@ -97,12 +91,10 @@ class ForkHandler(tornado.web.RequestHandler):
         text = self.request.arguments['body'][0]
         name = self.request.arguments['name'][0]
         parent_id = __id
-        lexer = guess_lexer(text)
-        html = highlight(text, lexer, HtmlFormatter())
         _id = snippets.insert({'title': name, 'body': unicode(text, 'utf-8'), 'forks' : []})
         # `safe` turns on error-checking for the update request, so we print out the response.
         print snippets.update({'_id': ObjectId(parent_id)}, {"$push": {"forks" : ObjectId(_id)}}, safe=True)
-        self.render("static/upload.html", name=name, code_html=html, id = _id, forked_from = parent_id, fork_count=0)
+        self.render("static/upload.html", name=name, code_html=text, id = _id, forked_from = parent_id, fork_count=0)
 
 class ViewForksHandler(tornado.web.RequestHandler):
 	@tornado.web.asynchronous
