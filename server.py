@@ -55,9 +55,36 @@ class UploadHandler(tornado.web.RequestHandler):
         file_content = self.request.files['file'][0]
         file_body = file_content['body']
         file_name = file_content['filename']
+        language_guessed = get_lexer_for_filename(file_name).name.lower()
+        
+        codemirror_mode = self.code_mirror_safe_mode(language_guessed)
+        
         # It's schemaless, so we don't need to specify null values for unused fields.
-        _id = snippets.insert({'title': file_name, 'body' : unicode(file_body, 'utf-8'), 'forks' : []})
-        self.render("static/templates/upload.html", name=file_name, code_html=file_body, id = _id, forked_from = None)
+        _id = snippets.insert({'title': file_name, 'body' : unicode(file_body, 'utf-8'), 'forks' : [], 'language': codemirror_mode})
+        print language_guessed
+        self.render("static/templates/upload.html", name=file_name, code_html=file_body, id = _id, forked_from = None, language_guessed = codemirror_mode)
+    def code_mirror_safe_mode(self, language):
+        if language == "python":
+            mode = "python"
+            return mode
+        elif language == "php":
+            mode = "application/x-httpd-php"
+            return mode
+        elif language == "html":
+            mode = "text/html"
+            return mode
+        elif language == "xml":
+            mode = "application/xml"
+            return mode
+        elif language == "javascript":
+            mode = "text/javascript"
+            return mode
+        elif language == "css":
+            mode = "text/css"
+            return mode
+        else:
+            return "text/plain"
+        
 
 class PasteHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
@@ -77,7 +104,8 @@ class ViewHandler(tornado.web.RequestHandler):
         else:
             forked_from_id = None
         fork_count = len(snippet['forks'])
-        self.render("static/templates/view.html", name = snippet['title'], code_html = snippet['body'], description = None, id=__id, fork_count = fork_count, forked_from = forked_from_id)
+        language = snippet['language']
+        self.render("static/templates/view.html", name = snippet['title'], code_html = snippet['body'], description = None, id=__id, fork_count = fork_count, forked_from = forked_from_id, mode=language)
 
 class ForkHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
@@ -107,7 +135,6 @@ class StatsHandler(tornado.web.RequestHandler):
     def get(self):
         # right now this makes a list of *every* snippet. this is obviously inefficient.
         # we need to find a way to query directly with mongo and limit to 10 results.
-        
         top_snippets = []
         for snippet in snippets.find():
             top_snippets.append([len(snippet['forks']), snippet['title'], snippet['_id']])

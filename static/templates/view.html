@@ -23,7 +23,7 @@
     {% end %}
     </div>
 
-    <div id="code_container" class="code_container">
+    <div id="code_container" class="code_container" style="height:70%">
         <textarea id="codebox">
             {{ code_html }}
         </textarea>
@@ -31,7 +31,8 @@
 
     <script> 
       var editor = CodeMirror.fromTextArea(document.getElementById("codebox"), {
-        lineNumbers: true
+        lineNumbers: true,
+        mode : "{{ mode }}"
       });
         // For later use
 <!--      function selectTheme(node) {-->
