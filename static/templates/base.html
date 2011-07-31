@@ -12,11 +12,15 @@
     {% block head %}{% end %}
   </head>
   <body {% block bodyhooks %}{% end %}>
-    {% block body %}
-    {% end %}
-    {% block footer %}
-    <footer style="position:relative;margin:0">
-    <div align="center">
+    <div id="wrap">
+        <div id="header">
+        </div>
+        <div id="main">
+            {% block body %}
+            {% end %}
+        </div>
+    </div>
+    <div align="center" id="footer">
         <p>
             <a class="hover_link" href="/">Home</a>
             -
@@ -26,8 +30,9 @@
             -
             <a class="hover_link" href="/stats">Stats</a>
         </p>
+        {% block footer %}
+        {% end %}
     </div>
-    </footer>
-    {% end %}
+
   </body>
 </html>

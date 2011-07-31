@@ -90,7 +90,7 @@ class UploadHandler(tornado.web.RequestHandler):
         codemirror_mode = self.code_mirror_safe_mode(language_guessed) 
                 
         snippets.insert({'title': file_name, 'mid' : word, 'body' : unicode(file_body, 'utf-8'), 'forks' : [], 'language': codemirror_mode})
-                
+        languages.insert({"language": language_guessed, "count": 0})        
         self.render("static/templates/upload.html", name=file_name, code_html=file_body, mid = word, forked_from = None, language_guessed = codemirror_mode)
     
     def code_mirror_safe_mode(self, language):
