@@ -118,3 +118,11 @@ body{background-color: #E8E8E8;font-family: 'Ovo', serif;}
 	cursor:pointer;
 }
 
+.hover_link {
+    text-decoration:none;
+    color:black
+}
+
+.hover_link:hover {
+    text-decoration: underline
+}
