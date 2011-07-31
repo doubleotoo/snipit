@@ -3,9 +3,10 @@
 {% block title %}Struts{% end %}
 
 {% block body %}
+    <div align="center" style="padding-top:10px;"><h1 style="text-shadow: 1px 1px 1px #fff">Stats</h1></div>
     <ul style="list-style:none;padding-top:20px;">
         {% for snippet in top_snippets %}
-            <li><p><a style="text-decoration:none; color:black;" href="http://snip.hunterlang.com/{{snippet[2]}}">{{snippet[1]}}</a></p><p style="font-size:8pt; color:gray;">{{snippet[0]}} Forks</p></li>
+            <li><p><a class="hover_link" href="{{snippet[2]}}">{{snippet[1]}}</a></p><p style="font-size:8pt; color:gray;">{{snippet[0]}} Forks</p></li>
         {% end %}
     </ul>
 {% end %}
