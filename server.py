@@ -66,7 +66,7 @@ class UploadHandler(tornado.web.RequestHandler):
     def post(self):
         client = tornado.httpclient.AsyncHTTPClient()
         request_url = "http://api.wordnik.com/v4/words.json/randomWord"
-        headers = {"Content-Type" : "application/json", "api_key" : VID}
+        headers = {"Content-Type" : "application/json", "api_key": VID}
         request = tornado.httpclient.HTTPRequest(request_url, headers=headers)
         client.fetch(request, self.random_callback)
 
