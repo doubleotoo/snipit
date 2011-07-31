@@ -19,7 +19,8 @@
 
     <script> 
       var editor = CodeMirror.fromTextArea(document.getElementById("codebox"), {
-        lineNumbers: true
+        lineNumbers: true,
+        mode: "{{ language }}"
       });
         // For later use
 <!--      function selectTheme(node) {-->

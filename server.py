@@ -146,6 +146,7 @@ class ViewHandler(tornado.web.RequestHandler):
         else:
             forked_from_mid = None
         fork_count = len(snippet['forks'])
+        print snippet
         language = snippet['language']
         self.render("static/templates/view.html", name = snippet['title'], code_html = snippet['body'], description = None, mid=mid, fork_count = fork_count, forked_from = forked_from_mid, mode=language)
 
@@ -154,8 +155,9 @@ class ForkHandler(tornado.web.RequestHandler):
     def get(self, mid):
         snippet_to_be_forked = snippets.find_one({'mid' : mid})
         raw_text = snippet_to_be_forked['body']
+        parent_language = language=snippet_to_be_forked['language']
         name = "Fork of " + snippet_to_be_forked['title']
-        self.render("static/templates/fork.html", name=name, raw_text=raw_text, mid=mid)
+        self.render("static/templates/fork.html", name=name, raw_text=raw_text, mid=mid, language=parent_language)
     @tornado.web.asynchronous
     def post(self, parent_mid):
         client = tornado.httpclient.AsyncHTTPClient()
@@ -168,10 +170,10 @@ class ForkHandler(tornado.web.RequestHandler):
         word = json.loads(response.body)['word']
         text = self.request.arguments['body'][0]
         name = self.request.arguments['name'][0]
-        _id = snippets.insert({'title': name, 'mid': word, 'body': unicode(text, 'utf-8'), 'forks' : []})
         parent_language = snippets.find_one({'mid' : parent_mid}, {'language' : 1})['language']
+        _id = snippets.insert({'title': name, 'mid': word, 'language' : parent_language,'body': unicode(text, 'utf-8'), 'forks' : []})
         # `safe` turns on error-checking for the update request, so we print out the response.
-        print snippets.update({'_id': parent_mid}, {"$push": {"forks" : ObjectId(_id)}}, safe=True)
+        print snippets.update({'mid': parent_mid}, {"$push": {"forks" : ObjectId(_id)}}, safe=True)
         self.render("static/templates/upload.html", name=name, code_html=text, mid = word, forked_from = parent_mid, fork_count=0, language_guessed=parent_language)
 
 class ViewForksHandler(tornado.web.RequestHandler):
