@@ -42,6 +42,7 @@ class Application(tornado.web.Application):
         # can have dashes in them.
         handlers = [
 			(r"/", IndexHandler),
+            (r"/about", AboutHandler),
 			(r"/upload", UploadHandler),
 			(r"/paste", PasteHandler),
 			(r"/stats", StatsHandler),
@@ -61,6 +62,11 @@ class IndexHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def get(self):
         self.render("static/templates/index.html")
+
+class AboutHandler(tornado.web.RequestHandler):
+    @tornado.web.asynchronous
+    def get(self):
+        self.render("static/templates/about.html")
 
 class UploadHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
