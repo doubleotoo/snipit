@@ -104,6 +104,17 @@ class UploadHandler(tornado.web.RequestHandler):
         elif language == "css":
             mode = "text/css"
             return mode
+        elif language == "c++":
+            mode = "text/x-c++src"
+            return mode
+        elif language == "c":
+            mode = "text/x-csrc"
+            return mode
+        elif language == "java":
+            print "LOL someone used java."
+            mode = "text/x-java"
+            return mode
+
         else:
             return "text/plain"
 
