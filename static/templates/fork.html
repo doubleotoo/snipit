@@ -9,7 +9,7 @@
 
 {% block bodyhooks %} style="" {% end %}
 {% block body %}
-    <form id="fork" method="post" enctype="multipart/form-data" action="/fork/{{ id }}">
+    <form id="fork" method="post" enctype="multipart/form-data" action="/fork/{{ mid }}">
         <textarea name="body" id="codebox" style="width:auto;height:auto;">{{ raw_text }}</textarea>
         <input type="hidden" name="name" value="{{ name }}">
         <br/>

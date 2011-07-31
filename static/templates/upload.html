@@ -12,7 +12,7 @@
             clip = new ZeroClipboard.Client();
             clip.setHandCursor( true );
             clip.glue( 'd_clip_button', 'd_clip_container' );
-            clip.setText("{{ SITE_ROOT }}/{{id}}");
+            clip.setText("{{ SITE_ROOT }}/{{mid}}");
         }; 
     </script>
 {% end %}
@@ -24,11 +24,9 @@
         <div id="d_clip_button" class="my_clip_button">Copy To Clipboard</div>
         
     </div>
+    <div style="margin-top:20px;">Public Link: <a id="publink" href="/{{mid}}">{{ SITE_ROOT }}/{{mid}}</a></div>
     {% if forked_from is not None %}
-        <div style="margin-top:20px;">Public Link: <a id="publink" href="/{{id}}">{{ SITE_ROOT }}/{{id}}</a></div>
         <div>Forked From: <a id="forklink" href="/{{forked_from}}">{{forked_from}}</a></div>
-    {% else %}
-        <div style="margin-top:20px;">Public Link: <a id="publink" href="/{{id}}">{{ SITE_ROOT }}/{{id}}</a></div>
     {% end %}
     
     </div>
