@@ -147,9 +147,7 @@ class ViewHandler(tornado.web.RequestHandler):
         else:
             forked_from_mid = None
         fork_count = len(snippet['forks'])
-        print snippet
         language = snippet['language']
-        print language
         self.render("static/templates/view.html", name = snippet['title'], code_html = snippet['body'], description = None, mid=mid, fork_count = fork_count, forked_from = forked_from_mid, mode=language)
 
 class ForkHandler(tornado.web.RequestHandler):
