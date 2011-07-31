@@ -208,7 +208,6 @@
         //THIS Gets called when server returns data!
         this.onLoad = function (event, files, index, xhr, handler) {
             document.write(xhr.responseText);
-            
             handler.removeNode(handler.uploadRow, function () {
             });
 			        

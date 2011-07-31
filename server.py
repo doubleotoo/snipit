@@ -37,7 +37,6 @@ class Application(tornado.web.Application):
 			(r"/fork/([A-Za-z0-9]+)", ForkHandler),
 			
         ]
-        
         settings = dict(
             debug = True, # For auto-reload
             static_path = os.path.join(os.path.dirname(__file__), "static"),

@@ -6,21 +6,10 @@
     <link href="{{ static_url('codemirror.css') }}" rel="stylesheet" type="text/css">
     <link href="{{ static_url('default.css') }}" rel="stylesheet" type="text/css">
     <script type="text/javascript" src="{{ static_url("copytoclip/copy.js") }}"></script>
-        
-    <script type="text/javascript">
-        ZeroClipboard.setMoviePath( '{{ static_url("copytoclip/ZeroClipboard.swf") }}' );
-        var clip = null;		
-        function init() {
-            clip = new ZeroClipboard.Client();
-            clip.setHandCursor( true );
-            clip.glue( 'd_clip_button', 'd_clip_container' );
-            clip.setText("{{ SITE_ROOT }}/{{id}}");
-        }
-    </script>
-{% end %}
-{% block bodyhooks %} onLoad="init()" {% end %}
-{% block body %}
 
+{% end %}
+{% block body %}
+    
     <div align="center" style="padding-top:10px;"><h1 style="text-shadow: 1px 1px 1px #fff">[Name Pending]</h1>
     <div id="d_clip_container" style="position:relative">
         <div class="my_clip_button"><a style="color:black; text-decoration:none;" href="/">Home</a></div>
@@ -33,10 +22,11 @@
     {% else %}
         <div style="margin-top:20px;">Public Link: <a id="publink" href="{{id}}">{{ SITE_ROOT }}/{{id}}</a></div>
     {% end %}
+    
     </div>
 
     <div id="code_container" class="code_container">
-        <textarea id="codebox" style="height:400px;">
+        <textarea id="codebox">
             {{ code_html }}
         </textarea>
     </div>
@@ -50,5 +40,14 @@
 <!--        var theme = node.options[node.selectedIndex].innerHTML;-->
 <!--        editor.setOption("theme", theme);-->
 <!--      }-->
-    </script> 
+    </script>
+            
+    <script type="text/javascript">
+        ZeroClipboard.setMoviePath( '{{ static_url("copytoclip/ZeroClipboard.swf") }}' );
+        var clip = null;		
+        clip = new ZeroClipboard.Client();
+        clip.setHandCursor( true );
+        clip.glue( 'd_clip_button', 'd_clip_container' );
+        clip.setText("{{ SITE_ROOT }}/{{id}}");
+    </script>
 {% end %}
