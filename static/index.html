@@ -1,11 +1,37 @@
 {% extends "base.html" %}
 
 {% block title %}Snippet Upload{% end %}
-
+{% block head %}
+    <script src="{{ static_url('codemirror.js') }}"></script>
+    <link href="{{ static_url('codemirror.css') }}" rel="stylesheet" type="text/css">
+    <link href="{{ static_url('default.css') }}" rel="stylesheet" type="text/css">
+    <link href="{{ static_url('hl.css') }}" media="screen, projection" rel="stylesheet" type="text/css">
+{% end %}
 {% block body %}
-<form id="upload" method="post" enctype="multipart/form-data" action="/upload">
-    <input name="file" type="file"/><br/>
-    <input type="submit" value="Upload File"/>
-   {{ xsrf_form_html() }}
-</form>
+    <div align="center"><h1 style="text-shadow: 1px 1px 1px #fff">[Name Pending]</h1></div>
+    
+    <div id="code_container" style="height:30em; width:auto;overflow:auto;margin-top:50px;-moz-box-shadow: 5px 5px 5px #ccc;-webkit-box-shadow: 0px 5px 5px #ccc; box-shadow: 5px 5px 5px #ccc;width: 100em;margin-left: auto;margin-right: auto;">
+        <textarea id="codebox">
+        </textarea>
+    </div>
+
+    <div align="center" style="margin-top:20px;margin-bottom:20px"><p style="font-size:36pt;text-shadow: 3px 3px 3px #ccc;">OR</p></div>
+    <div align="center">
+    <form id="upload" method="post" enctype="multipart/form-data" action="/upload">
+        <input name="file" type="file"/><br/>
+        <input type="submit" value="Upload File"/>
+        {{ xsrf_form_html() }}
+    </form>
+    </div>
+    
+    <script> 
+      var editor = CodeMirror.fromTextArea(document.getElementById("codebox"), {
+        lineNumbers: true
+      });
+        // For later use
+<!--      function selectTheme(node) {-->
+<!--        var theme = node.options[node.selectedIndex].innerHTML;-->
+<!--        editor.setOption("theme", theme);-->
+<!--      }-->
+    </script> 
 {% end %}

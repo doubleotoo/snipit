@@ -6,9 +6,14 @@
 .CodeMirror-scroll {
   overflow: auto;
   height: 100%;
+<<<<<<< HEAD
+=======
+  background-color: #fff;
+>>>>>>> massive UI makeover
   /* This is needed to prevent an IE[67] bug where the scrolled content
      is visible outside of the scrolling box. */
   position: relative;
+
 }
 
 .CodeMirror-gutter {
