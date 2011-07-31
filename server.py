@@ -55,6 +55,7 @@ class Application(tornado.web.Application):
             debug = True, # For auto-reload
             static_path = os.path.join(os.path.dirname(__file__), "static"),
             cookie_secret = "72-OrTzKXeAGaYdkL5gEmGeKSFumh7Ec+p2XdTP1o/Vo=",
+            xsrf_cookies=True,
         )
         tornado.web.Application.__init__(self, handlers, autoescape=None, **settings) # Disables auto escape in templates so xsrf works
 
@@ -88,7 +89,8 @@ class UploadHandler(tornado.web.RequestHandler):
             language_guessed = guess_lexer(file_body).name.lower()
         codemirror_mode = self.code_mirror_safe_mode(language_guessed) 
                 
-        snippets.insert({'title': file_name, 'mid' : word, 'body' : unicode(file_body, 'utf-8'), 'forks' : [], 'language': codemirror_mode})        
+        snippets.insert({'title': file_name, 'mid' : word, 'body' : unicode(file_body, 'utf-8'), 'forks' : [], 'language': codemirror_mode})
+                
         self.render("static/templates/upload.html", name=file_name, code_html=file_body, mid = word, forked_from = None, language_guessed = codemirror_mode)
     
     def code_mirror_safe_mode(self, language):
@@ -212,6 +214,7 @@ if __name__ == "__main__":
         connection = Connection(MONGO_SERVER)
         db = connection['struts'] # ~= database name
         snippets = db['snippets'] # ~= database table
+        languages = db['languages'] # for stats page/graph
         logging.info("Connected to database")
     except ConfigurationError:
         logging.critical("Can't connect to database with password \"%s\"" % options.password)
