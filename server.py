@@ -30,7 +30,9 @@ class Application(tornado.web.Application):
         handlers = [
 			(r"/", IndexHandler),
 			(r"/upload", UploadHandler),
+			(r"/paste", PasteHandler),
 			(r"/stats", StatsHandler),
+			(r"/viewforks/([A-Za-z0-9]+)", ViewForksHandler),
 			(r"/([A-Za-z0-9]+)", ViewHandler),
 			(r"/fork/([A-Za-z0-9]+)", ForkHandler),
 			
@@ -59,7 +61,16 @@ class UploadHandler(tornado.web.RequestHandler):
         # It's schemaless, so we don't need to specify null values for unused fields.
         _id = snippets.insert({'title': file_name, 'body' : unicode(file_body, 'utf-8'), 'forks' : []})
         self.render("static/upload.html", name=file_name, code_html=html, id = _id, forked_from = None)
-
+class PasteHandler(tornado.web.RequestHandler):
+    @tornado.web.asynchronous
+    def post(self):
+        file_body = self.request.arguments['body'][0]
+        file_name = self.request.arguments['name'][0]
+        lexer = guess_lexer(file_body)
+        html = highlight(file_body, lexer, HtmlFormatter())
+        # It's schemaless, so we don't need to specify null values for unused fields.
+        _id = snippets.insert({'title': file_name, 'body' : unicode(file_body, 'utf-8'), 'forks' : []})
+        self.render("static/upload.html", name=file_name, code_html=html, id = _id, forked_from = None)
 class ViewHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def get(self, __id):
@@ -92,6 +103,13 @@ class ForkHandler(tornado.web.RequestHandler):
         # `safe` turns on error-checking for the update request, so we print out the response.
         print snippets.update({'_id': ObjectId(parent_id)}, {"$push": {"forks" : ObjectId(_id)}}, safe=True)
         self.render("static/upload.html", name=name, code_html=html, id = _id, forked_from = parent_id, fork_count=0)
+
+class ViewForksHandler(tornado.web.RequestHandler):
+	@tornado.web.asynchronous
+	def get(self, __id):
+		snippet = snippets.find_one({'_id' : ObjectId(__id)})
+		print snippet['forks']
+		self.finish("")
 
 class StatsHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous

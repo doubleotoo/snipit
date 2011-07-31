@@ -9,12 +9,14 @@
 {% block bodyhooks %} style="" {% end %}
 {% block body %}
     <a class="my_clip_button" href="/fork/{{ id }}">Fork This Snippet</a>
-    {{ fork_count }} forks.
+    {{ fork_count }} forks. - <a href="/viewforks/{{id}}">View Forks</a>
     <br />
     {% if forked_from is not None %}
-        <div style="padding-top:15px;padding-bottom:10px;">Forked From: <a id="forklink" href="{{ SITE_ROOT }}/{{forked_from}}">{{forked_from}}</a></div>
+        <div style="padding-top:15px;padding-bottom:10px;">Forked From: <a id="forklink" href="/{{forked_from}}">{{forked_from}}</a></div>
     {% end %}
-    {{ code_html }}
+    <div id="code_container" style="height:400px; width:auto;overflow:auto;margin-top:50px;border-top:solid 1px #ccc; border-bottom: solid 1px #ccc">
+        {{ code_html }}
+    </div>
     
     <div style="padding-top:100px;">
     {% if description is not None %}

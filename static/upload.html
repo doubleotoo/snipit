@@ -30,7 +30,7 @@
     
     {% if forked_from is not None %}
         <div>Public Link: <a id="publink" href="{{id}}">{{ SITE_ROOT }}/{{id}}</a></div>
-        <div style="padding-bottom:100px;">Forked From: <a id="forklink" href="{{forked_from}}">{{forked_from}}</a></div>
+        <div style="padding-bottom:100px;">Forked From: <a id="forklink" href="/{{forked_from}}">{{forked_from}}</a></div>
     {% else %}
         <div style="padding-bottom:100px;">Public Link: <a id="publink" href="{{id}}">{{ SITE_ROOT }}/{{id}}</a></div>
     {% end %}
