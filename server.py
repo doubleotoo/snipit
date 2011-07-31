@@ -64,17 +64,18 @@ class UploadHandler(tornado.web.RequestHandler):
         request_url = "http://api.wordnik.com/v4/words.json/randomWord"
         headers = {"Content-Type" : "application/json", "api_key" : VID}
         request = tornado.httpclient.HTTPRequest(request_url, headers=headers)
-        client.fetch(request, self.handle_random)
+        client.fetch(request, self.random_callback)
 
-    def handle_random(self, response):
-        data = json.loads(response.body)
-        print data
+    def random_callback(self, response):
+        word = json.loads(response.body)['word']
         file_content = self.request.files['file'][0]
         file_body = file_content['body']
         file_name = file_content['filename']
-        # It's schemaless, so we don't need to specify null values for unused fields.
-        _id = snippets.insert({'title': file_name, 'body' : unicode(file_body, 'utf-8'), 'forks' : []})
-        self.render("static/templates/upload.html", name=file_name, code_html=file_body, id = _id, forked_from = None)
+        # mid == memorable ID. That's where the Wordnik-given random name goes.
+        # "id" is obviously taken, and I didn't want to add another direct
+        # spinoff of that token.
+        snippets.insert({'title': file_name, 'mid' : word, 'body' : unicode(file_body, 'utf-8'), 'forks' : []})
+        self.render("static/templates/upload.html", name=file_name, code_html=file_body, id = word, forked_from = None)
 
 class PasteHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
