@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright 2011 Hunter Lang, Avi Romanoff -XVII
+# Copyright 2011 Hunter Lang, Avi Romanoff
 #
 # MIT License
 import logging
