@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}About{% end %}
+
+{% block bodyhooks %} style="" {% end %}
+{% block body %}
+
+<div align="center">
+<div align="center" style="padding-top:10px;"><h1 style="text-shadow: 1px 1px 1px #fff">About</h1></div>
+<p>
+Oh fuck, ANOTHER PASTEBIN.
+<br />
+<br />
+<img align="middle" height="258px" width="346px" src="{{ static_url('img/rage.jpg') }}">
+<br />
+<br />
+Except, nope.
+This one is different.
+Here's how:
+<h3>&bull; <a class="hover_link" href="https://github.com/hunterlang/snippet.io">Open-source</a>, MIT license</h3>
+&bull; Written in <b>Struts</b> &ndash; a serious language for serious people
+<br />
+&bull; <b>Memorable</b> URL's, not Base36 or hashed junk
+<br />
+&bull; A real <b>code editor</b>, not some shitty &lt;textarea&gt;
+<br />
+&bull; Add snippets via file upload or <b>direct input</b>
+<br />
+&bull; Sane metaphors: <b>forking</b>, snippets
+<br />
+&bull; Automatic <b>language detection</b>
+</p>
+</center>
+{% end %}
