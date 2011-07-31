@@ -20,6 +20,7 @@ from pygments import highlight
 from pygments.lexers import *
 from pygments.formatters import HtmlFormatter
 from pygments.styles import get_style_by_name
+from pygments.util import ClassNotFound
 from pymongo import Connection
 from pymongo.objectid import ObjectId
 from pymongo.errors import ConfigurationError
@@ -65,7 +66,7 @@ class UploadHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def post(self):
         client = tornado.httpclient.AsyncHTTPClient()
-        request_url = "http://api.wordnik.com/v4/words.json/randomWord"
+        request_url = "http://api.wordnik.com/v4/words.json/randomWord?includePartOfSpeech=adjective&maxLength=18&minLength=2"
         headers = {"Content-Type" : "application/json", "api_key": VID}
         request = tornado.httpclient.HTTPRequest(request_url, headers=headers)
         client.fetch(request, self.random_callback)
@@ -75,14 +76,18 @@ class UploadHandler(tornado.web.RequestHandler):
         file_content = self.request.files['file'][0]
         file_body = file_content['body']
         file_name = file_content['filename']
-        language_guessed = get_lexer_for_filename(file_name).name.lower()  
-        codemirror_mode = self.code_mirror_safe_mode(language_guessed) 
-                
+        # Try/catch because get_lexer_for_filename throws it's
+        # ClassNotFound error if it can't guess properly.
+        try:
+            language_guessed = get_lexer_for_filename(file_name).name.lower()
+            codemirror_mode = self.code_mirror_safe_mode(language_guessed)
+            print language_guessed
+        except ClassNotFound:
+            codemirror_mode = 'text/plain'
         # mid == memorable ID. That's where the Wordnik-given random name goes.
         # "id" is obviously taken, and I didn't want to add another direct
         # spinoff of that token.
         snippets.insert({'title': file_name, 'mid' : word, 'body' : unicode(file_body, 'utf-8'), 'forks' : [], 'language': codemirror_mode})        
-        print language_guessed
         self.render("static/templates/upload.html", name=file_name, code_html=file_body, mid = word, forked_from = None, language_guessed = codemirror_mode)
     
     def code_mirror_safe_mode(self, language):
@@ -115,15 +120,11 @@ class UploadHandler(tornado.web.RequestHandler):
             mode = "text/x-java"
             return mode
 
-        else:
-            return "text/plain"
-
-
 class PasteHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def post(self):
         client = tornado.httpclient.AsyncHTTPClient()
-        request_url = "http://api.wordnik.com/v4/words.json/randomWord"
+        request_url = "http://api.wordnik.com/v4/words.json/randomWord?includePartOfSpeech=adjective&maxLength=18&minLength=2"
         headers = {"Content-Type" : "application/json", "api_key": VID}
         request = tornado.httpclient.HTTPRequest(request_url, headers=headers)
         client.fetch(request, self.random_callback)
@@ -158,7 +159,7 @@ class ForkHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def post(self, parent_mid):
         client = tornado.httpclient.AsyncHTTPClient()
-        request_url = "http://api.wordnik.com/v4/words.json/randomWord"
+        request_url = "http://api.wordnik.com/v4/words.json/randomWord?includePartOfSpeech=adjective&maxLength=18&minLength=2"
         headers = {"Content-Type" : "application/json", "api_key" : VID}
         request = tornado.httpclient.HTTPRequest(request_url, headers=headers)
         client.fetch(request, functools.partial(self.random_callback, parent_mid))
