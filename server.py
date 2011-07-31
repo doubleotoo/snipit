@@ -84,10 +84,19 @@ class UploadHandler(tornado.web.RequestHandler):
 class PasteHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def post(self):
+        client = tornado.httpclient.AsyncHTTPClient()
+        request_url = "http://api.wordnik.com/v4/words.json/randomWord"
+        headers = {"Content-Type" : "application/json", "api_key": VID}
+        request = tornado.httpclient.HTTPRequest(request_url, headers=headers)
+        client.fetch(request, self.random_callback)
+
+    def random_callback(self, response):
+        word = json.loads(response.body)['word']
         file_body = self.request.arguments['body'][0]
         file_name = self.request.arguments['name'][0]
-        _id = snippets.insert({'title': file_name, 'body' : unicode(file_body, 'utf-8'), 'forks' : []})
-        self.render("static/templates/upload.html", name=file_name, code_html=file_body, id = _id, forked_from = None)
+        snippets.insert({'title': file_name, 'mid' : word, 'body' : unicode(file_body, 'utf-8'), 'forks' : []})
+        self.render("static/templates/upload.html", name=file_name, code_html=file_body, mid = word, forked_from = None)
+
 class ViewHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def get(self, mid):
@@ -127,6 +136,9 @@ class ForkHandler(tornado.web.RequestHandler):
 class ViewForksHandler(tornado.web.RequestHandler):
 	@tornado.web.asynchronous
 	def get(self, mid):
+        # We really should look into turning on indexing for the mids.
+        # Mongo automatically indexes the ObjectIds, but it also lets 
+        # you select multiple other indexes. I'll look into that.
 		snippet = snippets.find_one({'mid' : mid})
 		print snippet['forks']
 		self.finish("")
