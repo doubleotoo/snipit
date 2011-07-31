@@ -82,17 +82,12 @@ class UploadHandler(tornado.web.RequestHandler):
         file_content = self.request.files['file'][0]
         file_body = file_content['body']
         file_name = file_content['filename']
-        # Try/catch because get_lexer_for_filename throws it's
-        # ClassNotFound error if it can't guess properly.
         try:
             language_guessed = get_lexer_for_filename(file_name).name.lower()
-            codemirror_mode = self.code_mirror_safe_mode(language_guessed)
-            print language_guessed
-        except ClassNotFound:
-            codemirror_mode = 'text/plain'
-        # mid == memorable ID. That's where the Wordnik-given random name goes.
-        # "id" is obviously taken, and I didn't want to add another direct
-        # spinoff of that token.
+        except Exception:
+            language_guessed = guess_lexer(file_body).name.lower()
+        codemirror_mode = self.code_mirror_safe_mode(language_guessed) 
+                
         snippets.insert({'title': file_name, 'mid' : word, 'body' : unicode(file_body, 'utf-8'), 'forks' : [], 'language': codemirror_mode})        
         self.render("static/templates/upload.html", name=file_name, code_html=file_body, mid = word, forked_from = None, language_guessed = codemirror_mode)
     
@@ -152,7 +147,6 @@ class ViewHandler(tornado.web.RequestHandler):
         else:
             forked_from_mid = None
         fork_count = len(snippet['forks'])
-        print snippet
         language = snippet['language']
         self.render("static/templates/view.html", name = snippet['title'], code_html = snippet['body'], description = None, mid=mid, fork_count = fork_count, forked_from = forked_from_mid, mode=language)
 
