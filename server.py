@@ -4,10 +4,12 @@
 #
 # MIT License
 import logging
+import json
 import re
 import sys
 import os.path
 import tornado.httpserver
+import tornado.httpclient
 import tornado.ioloop
 import tornado.options
 import tornado.web
@@ -20,6 +22,12 @@ from pygments.styles import get_style_by_name
 from pymongo import Connection
 from pymongo.objectid import ObjectId
 from pymongo.errors import ConfigurationError
+
+# Hi there fellow hacker. VID is Snippet's private API key.
+# Don't use it in your own app. Get your own. They're free and 
+# available from right here: http://api.wordnik.com/signup/
+# Thanks.
+VID = "5d7251322785b49fdf58d1f6fed01ada9d31a71c3ae369557"
 
 define("port", default=8888, help="run on the given port", type=int)
 define("password", default=None, help="MongoDB password", type=str, metavar="PASSWORD")
@@ -52,6 +60,15 @@ class IndexHandler(tornado.web.RequestHandler):
 class UploadHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def post(self):
+        client = tornado.httpclient.AsyncHTTPClient()
+        request_url = "http://api.wordnik.com/v4/words.json/randomWord"
+        headers = {"Content-Type" : "application/json", "api_key" : VID}
+        request = tornado.httpclient.HTTPRequest(request_url, headers=headers)
+        client.fetch(request, self.handle_random)
+
+    def handle_random(self, response):
+        data = json.loads(response.body)
+        print data
         file_content = self.request.files['file'][0]
         file_body = file_content['body']
         file_name = file_content['filename']
