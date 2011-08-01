@@ -15,7 +15,7 @@
         </textarea>
     </div>
 
-    <div align="center" style="margin-top:20px;margin-bottom:20px"><p style="font-size:30pt;text-shadow: 3px 3px 3px #ccc;">OR</p></div>
+    <div align="center" style="margin-top:20px;margin-bottom:10px"><p style="font-size:30pt;text-shadow: 3px 3px 3px #ccc;">OR</p></div>
     <div align="center">
 
     <form id="file_upload" class="file_upload blue" action="/upload" method="POST" enctype="multipart/form-data">
@@ -30,6 +30,7 @@
     <script> 
       var editor = CodeMirror.fromTextArea(document.getElementById("codebox"), {
         lineNumbers: true
+        mode: "{{ mode }}"
       });
         // For later use
 <!--      function selectTheme(node) {-->

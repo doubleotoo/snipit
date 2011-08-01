@@ -17,26 +17,58 @@
     </script>
 {% end %}
 {% block body %}
-    <div align="center" style="padding-top:10px;"><h1 style="text-shadow: 1px 1px 1px #fff">[Name Pending]</h1>
-    <div id="d_clip_container" style="position:relative">
-        <div class="my_clip_button"><a style="color:black; text-decoration:none;" href="/">Home</a></div>
+    <div id="default_prompt" {%if not show_default_prompt %}style="display:none"{% end %}>
+        <div class="prompt">
+        <p style="margin:20px;padding-top:20px; font-size:11pt; line-height:120%;">You just created a snippet written in {{ language_guessed }}!
+        If the robot guessed wrong, or {{ language_guessed }} isn't your most frequently used language, you can select a different one from the list below.</p>
         
-        <div id="d_clip_button" class="my_clip_button">Copy To Clipboard</div>
+        <form id="default_language_form" method="POST" enctype="multipart/form-data">
+   		   <input type="hidden" name="language" value="{{ language_guessed }}"/>
+    	   {{ xsrf_form_html() }}
+        </form>
         
-    </div>
-    <div style="margin-top:20px;">Public Link: <a id="publink" href="/{{mid}}">{{ SITE_ROOT }}/{{mid}}</a></div>
-    {% if forked_from is not None %}
-        <div>Forked From: <a id="forklink" href="/{{forked_from}}">{{forked_from}}</a></div>
-    {% end %}
-    
-    </div>
-
-    <div id="code_container" class="code_container">
-        <textarea id="codebox">
-            {{ code_html }}
-        </textarea>
+        <div id="forget_button" class="blue_button">Forget It</div><div id="set_button" class="blue_button">Set Default</div>
+        </div> 
     </div>
     
+    
+    <div id="content" {%if show_default_prompt %}style="opacity:0.0"{% end %}>
+        <div align="center" style="padding-top:10px;"><h1 style="text-shadow: 1px 1px 1px #fff">[Name Pending]</h1>
+        <div id="d_clip_container" style="position:relative">
+            <div class="my_clip_button"><a style="color:black; text-decoration:none;" href="/">Home</a></div>
+            <div id="d_clip_button" class="my_clip_button">Copy To Clipboard</div>
+        </div>
+        <div style="margin-top:20px;">Public Link: <a id="publink" href="/{{mid}}">{{ SITE_ROOT }}/{{mid}}</a></div>
+        {% if forked_from is not None %}
+            <div>Forked From: <a id="forklink" href="/{{forked_from}}">{{forked_from}}</a></div>
+        {% end %}
+    
+        <div align="left" id="code_container" class="code_container">
+            <textarea id="codebox">
+                {{ code_html }}
+            </textarea>
+        </div>
+    </div>
+    
+    <script>
+    $('#set_button').click(function() {
+        $.post("/default_language", $("#default_language_form").serialize());
+        $('#default_prompt').fadeOut('slow', function() {});
+        $('#content').animate({
+            opacity: 1.0,
+        }, 1000, function() {
+            // Animation complete.
+        });
+    });
+    $('#forget_button').click(function() {
+        $('#default_prompt').fadeOut('slow', function() {});
+        $('#content').animate({
+            opacity: 1.0,
+        }, 1000, function() {
+            // Animation complete.
+        });
+    });    
+    </script>
     <script> 
       var editor = CodeMirror.fromTextArea(document.getElementById("codebox"), {
         lineNumbers: true,

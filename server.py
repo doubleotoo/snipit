@@ -45,6 +45,7 @@ class Application(tornado.web.Application):
             (r"/about", AboutHandler),
 			(r"/upload", UploadHandler),
 			(r"/paste", PasteHandler),
+			(r"/default_language", DefaultLanguageHandler),
 			(r"/stats", StatsHandler),
 			(r"/viewforks/([\w-]+)", ViewForksHandler),
 			(r"/([\w-]+)", ViewHandler),
@@ -58,40 +59,10 @@ class Application(tornado.web.Application):
             xsrf_cookies=True,
         )
         tornado.web.Application.__init__(self, handlers, autoescape=None, **settings) # Disables auto escape in templates so xsrf works
-
-class IndexHandler(tornado.web.RequestHandler):
-    @tornado.web.asynchronous
-    def get(self):
-        self.render("static/templates/index.html")
-
-class AboutHandler(tornado.web.RequestHandler):
-    @tornado.web.asynchronous
-    def get(self):
-        self.render("static/templates/about.html")
-
-class UploadHandler(tornado.web.RequestHandler):
-    @tornado.web.asynchronous
-    def post(self):
-        client = tornado.httpclient.AsyncHTTPClient()
-        request_url = "http://api.wordnik.com/v4/words.json/randomWord?includePartOfSpeech=adjective&maxLength=18&minLength=2"
-        headers = {"Content-Type" : "application/json", "api_key": VID}
-        request = tornado.httpclient.HTTPRequest(request_url, headers=headers)
-        client.fetch(request, self.random_callback)
-
-    def random_callback(self, response):
-        word = json.loads(response.body)['word']
-        file_content = self.request.files['file'][0]
-        file_body = file_content['body']
-        file_name = file_content['filename']
-        try:
-            language_guessed = get_lexer_for_filename(file_name).name.lower()
-        except Exception:
-            language_guessed = guess_lexer(file_body).name.lower()
-        codemirror_mode = self.code_mirror_safe_mode(language_guessed) 
-                
-        snippets.insert({'title': file_name, 'mid' : word, 'body' : unicode(file_body, 'utf-8'), 'forks' : [], 'language': codemirror_mode})
-        languages.insert({"language": language_guessed, "count": 0})        
-        self.render("static/templates/upload.html", name=file_name, code_html=file_body, mid = word, forked_from = None, language_guessed = codemirror_mode)
+class BaseHandler(tornado.web.RequestHandler):
+    @property
+    def default_language(self):
+        return self.get_secure_cookie("default_language")
     
     def code_mirror_safe_mode(self, language):
         if language == "python":
@@ -122,6 +93,46 @@ class UploadHandler(tornado.web.RequestHandler):
             print "LOL someone used java."
             mode = "text/x-java"
             return mode
+class IndexHandler(BaseHandler):
+    @tornado.web.asynchronous
+    def get(self):
+        if self.default_language: default=self.code_mirror_safe_mode(self.default_language)
+        else: default="text/plain"
+        self.render("static/templates/index.html", mode=default)
+
+class AboutHandler(tornado.web.RequestHandler):
+    @tornado.web.asynchronous
+    def get(self):
+        self.render("static/templates/about.html")
+
+class UploadHandler(BaseHandler):
+    @tornado.web.asynchronous
+    def post(self):
+        client = tornado.httpclient.AsyncHTTPClient()
+        request_url = "http://api.wordnik.com/v4/words.json/randomWord?includePartOfSpeech=adjective&maxLength=18&minLength=2"
+        headers = {"Content-Type" : "application/json", "api_key": VID}
+        request = tornado.httpclient.HTTPRequest(request_url, headers=headers)
+        client.fetch(request, self.random_callback)
+
+    def random_callback(self, response):
+        word = json.loads(response.body)['word']
+        file_content = self.request.files['file'][0]
+        file_body = file_content['body']
+        file_name = file_content['filename']
+        try:
+            language_guessed = get_lexer_for_filename(file_name).name.lower()
+        except Exception:
+            language_guessed = guess_lexer(file_body).name.lower()
+        codemirror_mode = self.code_mirror_safe_mode(language_guessed) 
+        snippets.insert({'title': file_name, 'mid' : word, 'body' : unicode(file_body, 'utf-8'), 'forks' : [], 'language': codemirror_mode})
+        
+        if self.default_language: 
+            print self.default_language
+            show_default_prompt = False
+        else: show_default_prompt = True
+        
+        self.render("static/templates/upload.html", name=file_name, code_html=file_body, mid = word, forked_from = None, language_guessed = codemirror_mode, show_default_prompt=show_default_prompt)
+
 
 class PasteHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
@@ -139,6 +150,12 @@ class PasteHandler(tornado.web.RequestHandler):
         snippets.insert({'title': file_name, 'mid' : word, 'body' : unicode(file_body, 'utf-8'), 'forks' : []})
         self.render("static/templates/upload.html", name=file_name, code_html=file_body, mid = word, forked_from = None)
 
+class DefaultLanguageHandler(BaseHandler):
+    @tornado.web.asynchronous
+    def post(self):
+        self.set_secure_cookie("default_language", self.request.arguments['language'][0], expires_days=1)
+        print self.request.arguments['language']
+        self.finish("")
 class ViewHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def get(self, mid):
@@ -214,7 +231,6 @@ if __name__ == "__main__":
         connection = Connection(MONGO_SERVER)
         db = connection['struts'] # ~= database name
         snippets = db['snippets'] # ~= database table
-        languages = db['languages'] # for stats page/graph
         logging.info("Connected to database")
     except ConfigurationError:
         logging.critical("Can't connect to database with password \"%s\"" % options.password)
