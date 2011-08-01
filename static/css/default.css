@@ -16,19 +16,14 @@
 .cm-s-default span.cm-bracket {color: #cc7;}
 .cm-s-default span.cm-tag {color: #170;}
 .cm-s-default span.cm-attribute {color: #00c;}
-body{background-color: #E8E8E8;font-family: 'Ovo', serif; height: 100%;}
-html {height: 100%;}
+body{background-color: #E8E8E8;font-family: 'Ovo', serif; height: 100%; overflow: hidden;}
 .header {
     text-shadow: 1px 1px 1px #fff;
-    padding-bottom: 12px;
-}
-.header:hover {
-    padding-bottom: 10px;
 }
 
-#wrap {height: 100%;}
+#wrap {height: 100%; overflow: hidden}
 
-#main {padding-bottom: 70px;}  /* must be same height as the footer */
+#main {padding-bottom: 75px;overflow: auto;}  /* must be same height as the footer */
 
 #footer {
     position: relative;
