@@ -43,7 +43,8 @@ class Application(tornado.web.Application):
         handlers = [
 			(r"/", IndexHandler),
             (r"/about", AboutHandler),
-			(r"/upload", UploadHandler),
+			(r"/upload/nginx", UploadHandler),
+			(r"/file_upload", UploadHandler),
 			(r"/paste", PasteHandler),
 			(r"/default_language", DefaultLanguageHandler),
 			(r"/stats", StatsHandler),
@@ -56,7 +57,6 @@ class Application(tornado.web.Application):
             debug = True, # For auto-reload
             static_path = os.path.join(os.path.dirname(__file__), "static"),
             cookie_secret = "72-OrTzKXeAGaYdkL5gEmGeKSFumh7Ec+p2XdTP1o/Vo=",
-            xsrf_cookies=True,
         )
         tornado.web.Application.__init__(self, handlers, autoescape=None, **settings) # Disables auto escape in templates so xsrf works
 class BaseHandler(tornado.web.RequestHandler):
@@ -108,14 +108,24 @@ class AboutHandler(tornado.web.RequestHandler):
 class UploadHandler(BaseHandler):
     @tornado.web.asynchronous
     def post(self):
-        file_content = self.request.files['file'][0]
-        file_body = file_content['body']
-        file_name = file_content['filename']
+        file_name = self.request.arguments['file_name'][0]
+        file_path = self.request.arguments['file_path'][0]
+        self.ioloop = tornado.ioloop.IOLoop.instance()
+        self.pipe = p = os.popen("sudo cat " + file_path)
+        self.ioloop.add_handler(p.fileno(), self.async_callback(self.on_response), self.ioloop.READ)
+    
+    def on_response(self, fd, events):
+        file_name = self.request.arguments['file_name'][0]
+        file_body = ""
+        for line in self.pipe:
+            file_body = file_body + line        
         try:
             language_guessed = get_lexer_for_filename(file_name).name.lower()
         except Exception:
             language_guessed = guess_lexer(file_body).name.lower()
         codemirror_mode = self.code_mirror_safe_mode(language_guessed)         
+        self.ioloop.remove_handler(fd)
+        
         self.render("static/templates/codemirror.html", name=file_name,code_html=file_body, language_guessed = codemirror_mode)
 
 class PasteHandler(BaseHandler):
