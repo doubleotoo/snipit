@@ -193,7 +193,7 @@ class ForkHandler(tornado.web.RequestHandler):
         _id = snippets.insert({'title': name, 'mid': word, 'language' : parent_language,'body': unicode(text, 'utf-8'), 'forks' : []})
         # `safe` turns on error-checking for the update request, so we print out the response.
         print snippets.update({'mid': parent_mid}, {"$push": {"forks" : ObjectId(_id)}}, safe=True)
-        self.render("static/templates/upload.html", name=name, code_html=text, mid = word, forked_from = parent_mid, fork_count=0, language_guessed=parent_language)
+        self.render("static/templates/upload.html", name=name, code_html=text, mid = word, forked_from = parent_mid, fork_count=0, language_guessed=parent_language, show_default_prompt=False)
 
 class ViewForksHandler(tornado.web.RequestHandler):
 	@tornado.web.asynchronous
