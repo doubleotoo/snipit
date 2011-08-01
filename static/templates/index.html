@@ -8,7 +8,7 @@
     <link href="{{ static_url('css/codemirror.css') }}" rel="stylesheet" type="text/css">
 {% end %}
 {% block body %}
-    <div align="center" style="padding-top:10px;"><h1 style="text-shadow: 1px 1px 1px #fff">[Name Pending]</h1></div>
+    <div align="center" style="padding-top:10px;"><h1 class="header">[Name Pending]</h1></div>
     
     <div id="code_container" class="code_container">
         <textarea id="codebox">
@@ -40,6 +40,9 @@
     </script> 
     <script>
     $(function(){
+        $(".header").hover(function(){
+            $("#pic").fadeIn(100);
+        });
         $("file_upload").hover(function(){
 		  console.log("hover");
 		  $(this).animate({

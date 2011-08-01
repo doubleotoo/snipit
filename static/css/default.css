@@ -18,7 +18,13 @@
 .cm-s-default span.cm-attribute {color: #00c;}
 body{background-color: #E8E8E8;font-family: 'Ovo', serif; height: 100%;}
 html {height: 100%;}
-
+.header {
+    text-shadow: 1px 1px 1px #fff;
+    padding-bottom: 12px;
+}
+.header:hover {
+    padding-bottom: 10px;
+}
 
 #wrap {height: 100%;}
 
