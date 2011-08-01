@@ -43,7 +43,6 @@ class Application(tornado.web.Application):
         handlers = [
 			(r"/", IndexHandler),
             (r"/about", AboutHandler),
-			(r"/upload/nginx", UploadHandler),
 			(r"/file_upload", UploadHandler),
 			(r"/paste", PasteHandler),
 			(r"/default_language", DefaultLanguageHandler),
