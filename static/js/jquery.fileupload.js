@@ -52,7 +52,9 @@
                 multipart: true,
                 multiFileRequest: false,
                 withCredentials: false,
-                forceIframeUpload: false
+                forceIframeUpload: false,
+                open: function (event, ui) 
+                {alert("OMFGHOLYSHIT");},
             },
             documentListeners = {},
             dropZoneListeners = {},

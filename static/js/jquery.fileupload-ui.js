@@ -207,7 +207,8 @@
         
         //THIS Gets called when server returns data!
         this.onLoad = function (event, files, index, xhr, handler) {
-            document.write(xhr.responseText);
+            $('#form_container').html(xhr.responseText);
+            $("#upload_button").text("Go");
             handler.removeNode(handler.uploadRow, function () {
             });
 			        

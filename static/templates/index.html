@@ -10,35 +10,52 @@
 {% block body %}
     <div align="center" style="padding-top:10px;"><h1 class="header">[Name Pending]</h1></div>
     
-    <div id="code_container" class="code_container">
-        <textarea id="codebox">
-        </textarea>
+    <div id="form_container">
+    <form id="editor_form" method="post" enctype="multipart/form-data" action="/paste">
+        <div id="code_container" class="code_container">
+            <textarea name="body" id="codebox"></textarea>
+        </div>
+        <input type="hidden" name="name" value="None"/>
+        {{ xsrf_form_html() }}
+    </form>
     </div>
-
     <div align="center" style="margin-top:20px;margin-bottom:10px"><p style="font-size:30pt;text-shadow: 3px 3px 3px #ccc;">OR</p></div>
     <div align="center">
 
     <form id="file_upload" class="file_upload blue" action="/upload" method="POST" enctype="multipart/form-data">
    		<input type="file" name="file" multiple>
     	<button>Upload</button>
-    	<div>Upload</div>
+    	<div id="upload_button">Upload</div>
     	{{ xsrf_form_html() }}
     </form>
+    
+    
     <table style="display:none" id="files"></table></div>
     </div>
     
-    <script> 
-      var editor = CodeMirror.fromTextArea(document.getElementById("codebox"), {
-        lineNumbers: true,
-        mode: "{{ mode }}"
-      });
-        // For later use
-<!--      function selectTheme(node) {-->
-<!--        var theme = node.options[node.selectedIndex].innerHTML;-->
-<!--        editor.setOption("theme", theme);-->
-<!--      }-->
+    <script type="text/javascript"> 
+        function textChanged(editor){
+            if (editor.getValue() != "" && $("#upload_button").text() === "Upload") {
+                $("#upload_button").text("Go");
+                
+            }
+            if (editor.getValue() === "" && $("#upload_button").text() === "Go") {
+                $("#upload_button").text("Upload");
+                $('#file_upload').fileUpload('enable');
+            }
+        }; 
+        var editor = CodeMirror.fromTextArea(document.getElementById("codebox"), {
+            lineNumbers: true,
+            mode: "{{ mode }}",
+            onKeyEvent: textChanged
+            
+        });
+        function selectTheme(node) {
+            var theme = node.options[node.selectedIndex].innerHTML;
+            editor.setOption("theme", theme);
+        }
     </script> 
-    <script>
+    <script type="text/javascript">
     $(function(){
         $(".header").hover(function(){
             $("#pic").fadeIn(100);
@@ -50,6 +67,12 @@
             }, 5000, function() {
     		// Animation complete.
   		    });
+		});
+
+        $("#file_upload").click(function(){
+            if ($("#upload_button").text() === "Go") {                
+
+            }   
 		});
         $('#file_upload').fileUploadUI({
 			        uploadTable: $('#files'),

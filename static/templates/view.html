@@ -5,13 +5,30 @@
 {% block head %}
     <script src="{{ static_url('js/codemirror.js') }}"></script>
     <link href="{{ static_url('css/codemirror.css') }}" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="{{ static_url("copytoclip/copy.js") }}"></script>
+        <script type="text/javascript">
+        ZeroClipboard.setMoviePath( '{{ static_url("copytoclip/ZeroClipboard.swf") }}' );
+        var clip = null;		
+        function init(){
+            clip = new ZeroClipboard.Client();
+            clip.setHandCursor( true );
+            clip.glue( 'd_clip_button', 'd_clip_container' );
+            clip.setText("{{ SITE_ROOT }}/{{mid}}");
+        }; 
+    </script>
 {% end %}
 
 {% block bodyhooks %} style="" {% end %}
 {% block body %}
     <div align="center" style="padding-top:10px;"><h1 style="text-shadow: 1px 1px 1px #fff">[Name Pending]</h1>
-        <a class="my_clip_button" href="/fork/{{ mid }}">Fork This Snippet</a>
-        {{ fork_count }} forks. 
+        <div id="d_clip_container" style="position:relative">
+            
+            <div id="d_clip_button" class="my_clip_button">Copy Link To Clipboard</div>
+            <a class="my_clip_button" href="/fork/{{ mid }}">Fork This Snippet</a>
+        </div>
+        
+
+        <div style="margin-top:20px;">{{ fork_count }} forks.</div> 
         {% if fork_count is not 0 %}
             - <a href="/viewforks/{{mid}}">View Forks</a>
         {% end %}
@@ -25,7 +42,7 @@
         {{ description }}
     {% end %}
 
-    <div id="code_container" class="code_container" style="height:70%">
+    <div id="code_container" class="code_container" style="height:70%;margin-top:0px;">
         <textarea id="codebox">
             {{ code_html }}
         </textarea>
@@ -36,10 +53,6 @@
         lineNumbers: true,
         mode : "{{ mode }}"
       });
-        // For later use
-<!--      function selectTheme(node) {-->
-<!--        var theme = node.options[node.selectedIndex].innerHTML;-->
-<!--        editor.setOption("theme", theme);-->
-<!--      }-->
+        init();
     </script> 
 {% end %}

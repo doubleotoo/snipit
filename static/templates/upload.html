@@ -35,8 +35,7 @@
     <div id="content" {%if show_default_prompt %}style="opacity:0.0"{% end %}>
         <div align="center" style="padding-top:10px;"><h1 style="text-shadow: 1px 1px 1px #fff">[Name Pending]</h1>
         <div id="d_clip_container" style="position:relative">
-            <div class="my_clip_button"><a style="color:black; text-decoration:none;" href="/">Home</a></div>
-            <div id="d_clip_button" class="my_clip_button">Copy To Clipboard</div>
+            <div id="d_clip_button" class="my_clip_button">Copy to Clipboard</div>
         </div>
         <div style="margin-top:20px;">Public Link: <a id="publink" href="/{{mid}}">{{ SITE_ROOT }}/{{mid}}</a></div>
         {% if forked_from is not None %}
