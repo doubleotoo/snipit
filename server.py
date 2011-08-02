@@ -47,6 +47,7 @@ class Application(tornado.web.Application):
 			(r"/paste", PasteHandler),
 			(r"/default_language", DefaultLanguageHandler),
 			(r"/stats", StatsHandler),
+            (r"/ajaxpaste", AjaxPasteHandler),
 			(r"/viewforks/([\w-]+)", ViewForksHandler),
 			(r"/([\w-]+)", ViewHandler),
 			(r"/fork/([\w-]+)", ForkHandler),
@@ -56,7 +57,7 @@ class Application(tornado.web.Application):
             debug = True, # For auto-reload
             static_path = os.path.join(os.path.dirname(__file__), "static"),
             cookie_secret = "72-OrTzKXeAGaYdkL5gEmGeKSFumh7Ec+p2XdTP1o/Vo=",
-            xsrf_cookies=True,
+#            xsrf_cookies=True,
         )
         tornado.web.Application.__init__(self, handlers, autoescape=None, **settings) # Disables auto escape in templates so xsrf works
 class BaseHandler(tornado.web.RequestHandler):
@@ -143,12 +144,38 @@ class PasteHandler(BaseHandler):
         
         self.render("static/templates/upload.html", name=file_name, code_html=file_body, mid = word, forked_from = None, language_guessed = codemirror_mode, show_default_prompt=show_default_prompt)
 
+class AjaxPasteHandler(BaseHandler):
+    @tornado.web.asynchronous
+    def post(self):
+        client = tornado.httpclient.AsyncHTTPClient()
+        request_url = "http://api.wordnik.com/v4/words.json/randomWord?includePartOfSpeech=adjective&maxLength=18&minLength=2"
+        headers = {"Content-Type" : "application/json", "api_key": VID}
+        request = tornado.httpclient.HTTPRequest(request_url, headers=headers)
+        client.fetch(request, self.random_callback)
+
+    def random_callback(self, response):
+        word = json.loads(response.body)['word']
+        # Yeah I broke the default language prompty thing.
+        text = json.loads(self.request.body)['text']
+        file_name = word
+        language_guessed = guess_lexer(text).name.lower()
+        codemirror_mode = self.code_mirror_safe_mode(language_guessed)
+        print language_guessed
+        snippets.insert({'title': "no title", 'mid' : word, 'body' : text, 'forks' : [], 'language': codemirror_mode})
+#        if self.default_language: 
+#            print self.default_language
+#            show_default_prompt = False
+#        else: show_default_prompt = True
+#        
+        self.finish("http://71.224.204.102:8888/%s" % word)
+
 class DefaultLanguageHandler(BaseHandler):
     @tornado.web.asynchronous
     def post(self):
         self.set_secure_cookie("default_language", self.request.arguments['language'][0], expires_days=30)
         print self.request.arguments['language']
         self.finish("")
+
 class ViewHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def get(self, mid):

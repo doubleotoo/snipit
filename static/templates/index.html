@@ -22,74 +22,64 @@
     <div align="center" style="margin-top:20px;margin-bottom:10px"><p style="font-size:30pt;text-shadow: 3px 3px 3px #ccc;">OR</p></div>
     <div align="center">
 
+    <div id="magic">
     <form id="file_upload" class="file_upload blue" action="/upload" method="POST" enctype="multipart/form-data">
    		<input type="file" name="file" multiple>
     	<button>Upload</button>
     	<div id="upload_button">Upload</div>
     	{{ xsrf_form_html() }}
     </form>
+    </div>
     
-    
-    <table style="display:none" id="files"></table></div>
+    <table style="display:none" id="files"></table>
+    </div>
     </div>
     
     <script type="text/javascript"> 
-        function textChanged(editor){
-            if (editor.getValue() != "" && $("#upload_button").text() === "Upload") {
-                $("#upload_button").text("Go");
-                
-            }
-            if (editor.getValue() === "" && $("#upload_button").text() === "Go") {
-                $("#upload_button").text("Upload");
-                $('#file_upload').fileUpload('enable');
-            }
-        }; 
+        // Pay off the fairies so the black magic doesn't fail us.
+        $('#file_upload').fileUploadUI({
+		            uploadTable: $('#files'),
+		            downloadTable: $('#files')
+        });
+
+        // Inject codemirror into the textarea and configure it.
         var editor = CodeMirror.fromTextArea(document.getElementById("codebox"), {
             lineNumbers: true,
             mode: "{{ mode }}",
             onKeyEvent: textChanged
             
         });
-        function selectTheme(node) {
-            var theme = node.options[node.selectedIndex].innerHTML;
-            editor.setOption("theme", theme);
-        }
-    </script> 
-    <script type="text/javascript">
-    $(function(){
-        $(".header").hover(function(){
-            $("#pic").fadeIn(100);
-        });
-        $("file_upload").hover(function(){
-		  console.log("hover");
-		  $(this).animate({
-             background: '#a2d6ef'
-            }, 5000, function() {
-    		// Animation complete.
-  		    });
-		});
 
-        $("#file_upload").click(function(){
+        // Handle changes to editor's content.
+        function textChanged(editor) {
+            // Text entered
+            if (editor.getValue() !== "" && $("#upload_button").text() === "Upload") {
+                $("#upload_button").text("Go");
+                
+            }
+            // No text entered
+            if (editor.getValue() === "" && $("#upload_button").text() === "Go") {
+                $("#upload_button").text("Upload");
+                $('#file_upload').fileUpload('enable');
+            }
+        }; 
+
+        // Handle clicking the button.
+        $("#file_upload").click(function() {
             if ($("#upload_button").text() === "Go") {                
+                // FFFUUUU
+            }
+	    });
 
-            }   
-		});
-        $('#file_upload').fileUploadUI({
-			        uploadTable: $('#files'),
-			        downloadTable: $('#files'),
-			        buildUploadRow: function (files, index) {
-			            return $('<tr><td>' + files[index].name + '<\/td>' +
-			                    '<td class="file_upload_progress"><div><\/div><\/td>' +
-			                    '<td class="file_upload_cancel">' +
-			                    '<button class="ui-state-default ui-corner-all" title="Cancel">' +
-			                    '<span class="ui-icon ui-icon-cancel">Cancel<\/span>' +
-			                    '<\/button><\/td><\/tr>');
-			        },
-			        buildDownloadRow: function (file) {
-			            return $('<tr><td>' + file.name + '<\/td><\/tr>');
-			        }
-			    });			
-			
-    });
+        // Handle clicking the button.
+        $("#submit_upload").live('click', function() {
+            var data = JSON.stringify({"text" : editor.getValue()});
+            console.log(data);
+            $.post("/ajaxpaste", data, function(response) {
+                    redirect = response;
+                    window.location = redirect;
+                });
+	    });
+        
     </script>
 {% end %}
