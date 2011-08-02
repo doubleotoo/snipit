@@ -159,7 +159,6 @@ body{background-color: #E8E8E8;font-family: 'Ovo', serif; height: 100%; overflow
 }
 
 .blue_button {
-    float:right;
 	margin-top:auto;
 	position:relative;
 	cursor:pointer;
@@ -168,7 +167,7 @@ body{background-color: #E8E8E8;font-family: 'Ovo', serif; height: 100%; overflow
 	color: white;
 	font-size: 12pt;
 	font-weight: 900;
-	width:100px;
+	width:120px;
 	height:20px;
 	display: inline;
 	margin-left: 10px;

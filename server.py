@@ -171,8 +171,8 @@ class ViewForksHandler(tornado.web.RequestHandler):
 		fork_list = []
 		the_snippet = snippets.find_one({'mid' : mid})
 		for thing in the_snippet['forks']:
-            snippet = snippets.find_one({'_id' : thing})
-            fork_list.append([snippet['title'], snippet['mid']])
+		  snippet = snippets.find_one({'_id' : thing})
+		  fork_list.append([snippet['title'], snippet['mid']])
 		self.render("static/templates/viewforks.html", forks=fork_list, title=the_snippet['title'])
 
 class StatsHandler(tornado.web.RequestHandler):
