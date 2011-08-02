@@ -112,16 +112,12 @@ class PasteHandler(BaseHandler):
         word = json.loads(response.body)['word']
         file_body = self.request.arguments['body'][0]
         file_name = self.request.arguments['name'][0]
-        print file_name
-        if file_name == "None": 
-            print "User did NOT upload a file"
-            file_name=word
         try:
             language_guessed = get_lexer_for_filename(file_name).name.lower()
         except Exception:
             language_guessed = guess_lexer(file_body).name.lower()
         
-        
+        file_name=word
         codemirror_mode = self.code_mirror_safe_mode(language_guessed)
         
         snippets.insert({'title': file_name, 'mid' : word, 'body' : unicode(file_body, 'utf-8'), 'forks' : [], 'language': codemirror_mode})
@@ -160,12 +156,11 @@ class ForkHandler(tornado.web.RequestHandler):
     def random_callback(self, parent_mid, response):
         word = json.loads(response.body)['word']
         text = self.request.arguments['body'][0]
-        name = self.request.arguments['name'][0]
         parent_language = snippets.find_one({'mid' : parent_mid}, {'language' : 1})['language']
-        _id = snippets.insert({'title': name, 'mid': word, 'language' : parent_language,'body': unicode(text, 'utf-8'), 'forks' : []})
+        _id = snippets.insert({'title': word, 'mid': word, 'language' : parent_language,'body': unicode(text, 'utf-8'), 'forks' : []})
         # `safe` turns on error-checking for the update request, so we print out the response.
         print snippets.update({'mid': parent_mid}, {"$push": {"forks" : ObjectId(_id)}}, safe=True)
-        self.render("static/templates/upload.html", name=name, code_html=text, mid = word, forked_from = parent_mid, fork_count=0, language_guessed=parent_language, show_default_prompt=False)
+        self.render("static/templates/upload.html", name=word, code_html=text, mid = word, forked_from = parent_mid, fork_count=0, language_guessed=parent_language, show_default_prompt=False)
 
 class ViewForksHandler(tornado.web.RequestHandler):
 	@tornado.web.asynchronous
@@ -173,9 +168,12 @@ class ViewForksHandler(tornado.web.RequestHandler):
         # We really should look into turning on indexing for the mids.
         # Mongo automatically indexes the ObjectIds, but it also lets 
         # you select multiple other indexes. I'll look into that.
-		snippet = snippets.find_one({'mid' : mid})
-		print snippet['forks']
-		self.finish("")
+		fork_list = []
+		the_snippet = snippets.find_one({'mid' : mid})
+		for thing in the_snippet['forks']:
+            snippet = snippets.find_one({'_id' : thing})
+            fork_list.append([snippet['title'], snippet['mid']])
+		self.render("static/templates/viewforks.html", forks=fork_list, title=the_snippet['title'])
 
 class StatsHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
