@@ -59,16 +59,19 @@
             }
             // No text entered
             if (editor.getValue() === "" && $("#upload_button").text() === "Go") {
-                $('#magic').html('<form id="file_upload" class="file_upload blue" action="/upload" method="POST" enctype="multipart/form-data"><button>Go</button><div id="upload_button">Upload</div></form>');
+                $('#magic').html('<form id="file_upload" class="file_upload blue" action="/upload" method="POST" enctype="multipart/form-data"> <input type="file" name="file" multiple><button>Upload</button><div id="upload_button">Upload</div>{{ xsrf_form_html() }}</form>');
             }
         }; 
 
+
+        // Not sure this is needed.
+        /*
         // Handle clicking the button.
         $("#file_upload").click(function() {
-            if ($("#upload_button").text() === "Go") {                
-                // FFFUUUU
+            if ($("#upload_button").text() === "Go") {
             }
 	    });
+        */
 
         // Handle clicking the button.
         $("#submit_upload").live('click', function() {
