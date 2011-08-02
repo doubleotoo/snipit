@@ -19,15 +19,14 @@
 {% block body %}
     <div id="default_prompt" {%if not show_default_prompt %}style="display:none"{% end %}>
         <div class="prompt">
-        <p style="margin:20px;padding-top:20px; font-size:11pt; line-height:120%;">You just created a snippet written in {{ language_guessed }}!
-        If the robot guessed wrong, or {{ language_guessed }} isn't your most frequently used language, you can select a different one from the list below.</p>
+        <p style="margin:20px;padding-top:20px; font-size:11pt; line-height:120%;">You just created a snippet written in {{ language_guessed }}!</p>
         
         <form id="default_language_form" method="POST" enctype="multipart/form-data">
    		   <input type="hidden" name="language" value="{{ language_guessed }}"/>
     	   {{ xsrf_form_html() }}
         </form>
         
-        <div id="forget_button" class="blue_button">Forget It</div><div id="set_button" class="blue_button">Set Default</div>
+        <div  id="forget_button" class="blue_button" style="margin-top:30px;">Forget It</div><div id="set_button" class="blue_button" style="margin-top:30px;">Set Default</div>
         </div> 
     </div>
     

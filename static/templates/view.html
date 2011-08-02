@@ -28,14 +28,16 @@
         </div>
         
 
-        <div style="margin-top:20px;">{{ fork_count }} forks.</div> 
+        <div style="margin-top:20px;">{{ fork_count }} forks. 
         {% if fork_count is not 0 %}
             - <a href="/viewforks/{{mid}}">View Forks</a>
         {% end %}
+        
         <br />
         {% if forked_from is not None %}
-            <div style="padding-top:15px;padding-bottom:10px;">Forked From: <a id="forklink" href="/{{forked_from}}">{{forked_from}}</a></div>
+            <div style="padding-bottom:10px;">Forked From: <a id="forklink" href="/{{forked_from}}">{{forked_from}}</a></div>
         {% end %}
+        </div>
     </div>
 
     {% if description is not None %}
