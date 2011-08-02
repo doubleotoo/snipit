@@ -15,7 +15,7 @@
         <div id="code_container" class="code_container">
             <textarea name="body" id="codebox"></textarea>
         </div>
-        <input type="hidden" name="name" value="None"/>
+        <input id="uploaded_file_name" type="hidden" name="name" value="None"/>
         {{ xsrf_form_html() }}
     </form>
     </div>
@@ -54,13 +54,12 @@
         function textChanged(editor) {
             // Text entered
             if (editor.getValue() !== "" && $("#upload_button").text() === "Upload") {
-                $("#upload_button").text("Go");
+                $('#magic').html('<form id="submit_upload" class="file_upload blue" action="/upload" method="POST" enctype="multipart/form-data"><button>Go</button><div id="upload_button">Go</div></form>');
                 
             }
             // No text entered
             if (editor.getValue() === "" && $("#upload_button").text() === "Go") {
-                $("#upload_button").text("Upload");
-                $('#file_upload').fileUpload('enable');
+                $('#magic').html('<form id="file_upload" class="file_upload blue" action="/upload" method="POST" enctype="multipart/form-data"><button>Go</button><div id="upload_button">Upload</div></form>');
             }
         }; 
 
@@ -73,11 +72,8 @@
 
         // Handle clicking the button.
         $("#submit_upload").live('click', function() {
-            var data = JSON.stringify({"text" : editor.getValue()});
-            console.log(data);
-            $.post("/ajaxpaste", data, function(response) {
-                    redirect = response;
-                    window.location = redirect;
+            $.post("/paste", {"body" : editor.getValue(), "name": $("#uploaded_file_name").val()}, function(response) {
+                    document.write(response);
                 });
 	    });
         
