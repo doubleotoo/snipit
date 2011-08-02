@@ -45,7 +45,6 @@ class Application(tornado.web.Application):
             (r"/about", AboutHandler),
 			(r"/upload", UploadHandler),
 			(r"/paste", PasteHandler),
-			(r"/default_language", DefaultLanguageHandler),
 			(r"/stats", StatsHandler),
 			(r"/viewforks/([\w-]+)", ViewForksHandler),
 			(r"/([\w-]+)", ViewHandler),
@@ -60,45 +59,23 @@ class Application(tornado.web.Application):
         )
         tornado.web.Application.__init__(self, handlers, autoescape=None, **settings) # Disables auto escape in templates so xsrf works
 class BaseHandler(tornado.web.RequestHandler):
-    @property
-    def default_language(self):
-        return self.get_secure_cookie("default_language")
-    
     def code_mirror_safe_mode(self, language):
-        if language == "python":
-            mode = "python"
-            return mode
-        elif language == "php":
-            mode = "application/x-httpd-php"
-            return mode
-        elif language == "html":
-            mode = "text/html"
-            return mode
-        elif language == "xml":
-            mode = "application/xml"
-            return mode
-        elif language == "javascript":
-            mode = "text/javascript"
-            return mode
-        elif language == "css":
-            mode = "text/css"
-            return mode
-        elif language == "c++":
-            mode = "text/x-c++src"
-            return mode
-        elif language == "c":
-            mode = "text/x-csrc"
-            return mode
-        elif language == "java":
-            print "LOL someone used java."
-            mode = "text/x-java"
-            return mode
-class IndexHandler(BaseHandler):
+        if language == "python":mode = "python"
+        elif language == "php":mode = "application/x-httpd-php"
+        elif language == "html":mode = "text/html"
+        elif language == "xml":mode = "application/xml"
+        elif language == "javascript":mode = "text/javascript"
+        elif language == "css":mode = "text/css"
+        elif language == "c++":mode = "text/x-c++src"
+        elif language == "c":mode = "text/x-csrc"
+        elif language == "java":mode = "text/x-java"
+        elif language == "perl":mode = "python"
+        else: mode="text/plain"
+        return mode
+class IndexHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def get(self):
-        if self.default_language: default=self.code_mirror_safe_mode(self.default_language)
-        else: default="text/plain"
-        self.render("static/templates/index.html", mode=default)
+        self.render("static/templates/index.html")
 
 class AboutHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
@@ -113,9 +90,13 @@ class UploadHandler(BaseHandler):
         file_name = file_content['filename']
         try:
             language_guessed = get_lexer_for_filename(file_name).name.lower()
+            print "Got file that has extension"
         except Exception:
             language_guessed = guess_lexer(file_body).name.lower()
-        codemirror_mode = self.code_mirror_safe_mode(language_guessed)         
+            print "No file extension"
+        
+        codemirror_mode = self.code_mirror_safe_mode(language_guessed)
+                
         self.render("static/templates/codemirror.html", name=file_name,code_html=file_body, language_guessed = codemirror_mode)
 
 class PasteHandler(BaseHandler):
@@ -131,24 +112,21 @@ class PasteHandler(BaseHandler):
         word = json.loads(response.body)['word']
         file_body = self.request.arguments['body'][0]
         file_name = self.request.arguments['name'][0]
-        if file_name is "None": file_name=word
-        language_guessed = guess_lexer(file_body).name.lower()
+        print file_name
+        if file_name == "None": 
+            print "User did NOT upload a file"
+            file_name=word
+        try:
+            language_guessed = get_lexer_for_filename(file_name).name.lower()
+        except Exception:
+            language_guessed = guess_lexer(file_body).name.lower()
+        
+        
         codemirror_mode = self.code_mirror_safe_mode(language_guessed)
+        
         snippets.insert({'title': file_name, 'mid' : word, 'body' : unicode(file_body, 'utf-8'), 'forks' : [], 'language': codemirror_mode})
         
-        if self.default_language: 
-            print self.default_language
-            show_default_prompt = False
-        else: show_default_prompt = True
-        
-        self.render("static/templates/upload.html", name=file_name, code_html=file_body, mid = word, forked_from = None, language_guessed = codemirror_mode, show_default_prompt=show_default_prompt)
-
-class DefaultLanguageHandler(BaseHandler):
-    @tornado.web.asynchronous
-    def post(self):
-        self.set_secure_cookie("default_language", self.request.arguments['language'][0], expires_days=30)
-        print self.request.arguments['language']
-        self.finish("")
+        self.render("static/templates/upload.html", name=file_name, code_html=file_body, mid = word, forked_from = None, language_guessed = codemirror_mode)
 
 class ViewHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous

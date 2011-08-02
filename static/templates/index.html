@@ -19,8 +19,8 @@
         {{ xsrf_form_html() }}
     </form>
     </div>
-    <div align="center" style="margin-top:20px;margin-bottom:10px"><p style="font-size:30pt;text-shadow: 3px 3px 3px #ccc;">OR</p></div>
-    <div align="center">
+    <!-- <div align="center" style="margin-top:20px;margin-bottom:10px"><p style="font-size:30pt;text-shadow: 3px 3px 3px #ccc;">OR</p></div>  -->
+    <div align="center" style="padding-top: 2em;">
 
     <div id="magic">
     <form id="file_upload" class="file_upload blue" action="/upload" method="POST" enctype="multipart/form-data">
@@ -45,7 +45,6 @@
         // Inject codemirror into the textarea and configure it.
         var editor = CodeMirror.fromTextArea(document.getElementById("codebox"), {
             lineNumbers: true,
-            mode: "{{ mode }}",
             onKeyEvent: textChanged
             
         });

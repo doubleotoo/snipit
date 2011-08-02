@@ -7,7 +7,7 @@
     <link href="{{ static_url('css/codemirror.css') }}" rel="stylesheet" type="text/css">
 {% end %}
 
-{% block bodyhooks %} style="" {% end %}
+{% block bodyhooks %}{% end %}
 {% block body %}
     <div align="center" style="padding-top:10px;"><h1 class="header">[Name Pending]</h1>
         <form id="fork" method="post" enctype="multipart/form-data" action="/fork/{{ mid }}">
