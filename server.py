@@ -24,6 +24,7 @@ from pygments.util import ClassNotFound
 from pymongo import Connection
 from pymongo.objectid import ObjectId
 from pymongo.errors import ConfigurationError
+from pymongo import ASCENDING, DESCENDING
 
 # Hi there fellow hacker. VID is Snippet's private API key.
 # Don't use it in your own app. Get your own. They're free and 
