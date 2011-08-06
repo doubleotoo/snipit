@@ -21,9 +21,9 @@ body{background-color: #E8E8E8;font-family: 'Ovo', serif; height: 100%; overflow
     text-shadow: 1px 1px 1px #fff;
 }
 
-#wrap {height: 100%; overflow: hidden}
+#wrap {min-height: 100%; overflow: auto}
 
-#main {padding-bottom: 75px;overflow: auto;}  /* must be same height as the footer */
+#main {padding-bottom: 75px;overflow: auto;margin-bottom: 10px;}  /* must be same height as the footer */
 
 #footer {
     position: relative;
