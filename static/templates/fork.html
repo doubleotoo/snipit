@@ -8,7 +8,7 @@
 
 {% block bodyhooks %}{% end %}
 {% block body %}
-    <div align="center" style="padding-top:10px;"><h1 class="header">[<a href="http://www.google.com/search?q={{name}}" target="_blank" class="hover_link">{{ name }}</a>]</h1>
+    <div align="center" style="padding-top:10px;"><h1 class="header">[<a href="http://www.google.com/search?q=define:{{name}}" target="_blank" class="hover_link">{{ name }}</a>]</h1>
         <form id="fork" method="post" enctype="multipart/form-data" action="/fork/{{ mid }}">
             <input type="submit" class="my_clip_button" value="Fork"/>
             <div align="left" id="code_container" class="code_container">

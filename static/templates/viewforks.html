@@ -10,7 +10,6 @@
     {% for fork in forks %}
         <li style="text-shadow:1px 1px 1px #fff;">
             <p><b><a class="hover_link" href="/{{fork[1]}}">{{ fork[0] }}</a></b></p>
-            <div><div class="blue_button">View Differences</div></div>
             <p style="padding-top:10px;font-size:10pt; color:#aaa;">{{SITE_ROOT}}/{{fork[1]}}</p>
         </li>
     {% end %}

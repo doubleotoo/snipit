@@ -70,6 +70,7 @@ class BaseHandler(tornado.web.RequestHandler):
         elif language == "c":mode = "text/x-csrc"
         elif language == "java":mode = "text/x-java"
         elif language == "perl":mode = "python"
+        elif language == "objc":mode = "text/x-csrc"
         else: mode="text/plain"
         return mode
 class IndexHandler(tornado.web.RequestHandler):
@@ -169,8 +170,8 @@ class ForkHandler(tornado.web.RequestHandler):
         # `safe` turns on error-checking for the update request, so we print out the response.
         print snippets.update({'mid': parent_mid}, {"$push": {"forks" : ObjectId(_id)}}, safe=True)
         
-        #self.redirect("/" + word)
-        self.render("static/templates/upload.html", name=word, code_html=text, mid = word, forked_from = parent_mid, fork_count=0, language_guessed=parent_language, show_default_prompt=False)
+        self.redirect("/" + word)
+        #self.render("static/templates/upload.html", name=word, code_html=text, mid = word, forked_from = parent_mid, fork_count=0, language_guessed=parent_language, show_default_prompt=False)
 
 class ViewForksHandler(tornado.web.RequestHandler):
 	@tornado.web.asynchronous
