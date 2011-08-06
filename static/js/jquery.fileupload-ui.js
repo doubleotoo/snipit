@@ -208,7 +208,8 @@
         //THIS Gets called when server returns data!
         this.onLoad = function (event, files, index, xhr, handler) {
             $('#form_container').html(xhr.responseText);
-            $("#upload_button").text("Go");
+//            $("#upload_button").text("Go");
+            $('#magic').html('<form id="submit_upload" class="file_upload blue" action="/file_upload" method="POST" enctype="multipart/form-data"><button>Go</button><div id="upload_button">Go</div></form>');
             handler.removeNode(handler.uploadRow, function () {
             });
 			        

@@ -34,6 +34,7 @@ VID = "5d7251322785b49fdf58d1f6fed01ada9d31a71c3ae369557"
 define("port", default=8888, help="run on the given port", type=int)
 define("password", default=None, help="MongoDB password", type=str, metavar="PASSWORD")
 
+
 # This defines the applications routes
 class Application(tornado.web.Application):
     def __init__(self):
@@ -45,7 +46,6 @@ class Application(tornado.web.Application):
             (r"/about", AboutHandler),
 			(r"/file_upload", UploadHandler),
 			(r"/paste", PasteHandler),
-			(r"/default_language", DefaultLanguageHandler),
 			(r"/stats", StatsHandler),
 			(r"/viewforks/([\w-]+)", ViewForksHandler),
 			(r"/([\w-]+)", ViewHandler),
@@ -59,45 +59,23 @@ class Application(tornado.web.Application):
         )
         tornado.web.Application.__init__(self, handlers, autoescape=None, **settings) # Disables auto escape in templates so xsrf works
 class BaseHandler(tornado.web.RequestHandler):
-    @property
-    def default_language(self):
-        return self.get_secure_cookie("default_language")
-    
     def code_mirror_safe_mode(self, language):
-        if language == "python":
-            mode = "python"
-            return mode
-        elif language == "php":
-            mode = "application/x-httpd-php"
-            return mode
-        elif language == "html":
-            mode = "text/html"
-            return mode
-        elif language == "xml":
-            mode = "application/xml"
-            return mode
-        elif language == "javascript":
-            mode = "text/javascript"
-            return mode
-        elif language == "css":
-            mode = "text/css"
-            return mode
-        elif language == "c++":
-            mode = "text/x-c++src"
-            return mode
-        elif language == "c":
-            mode = "text/x-csrc"
-            return mode
-        elif language == "java":
-            print "LOL someone used java."
-            mode = "text/x-java"
-            return mode
-class IndexHandler(BaseHandler):
+        if language == "python":mode = "python"
+        elif language == "php":mode = "application/x-httpd-php"
+        elif language == "html":mode = "text/html"
+        elif language == "xml":mode = "application/xml"
+        elif language == "javascript":mode = "text/javascript"
+        elif language == "css":mode = "text/css"
+        elif language == "c++":mode = "text/x-c++src"
+        elif language == "c":mode = "text/x-csrc"
+        elif language == "java":mode = "text/x-java"
+        elif language == "perl":mode = "python"
+        else: mode="text/plain"
+        return mode
+class IndexHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def get(self):
-        if self.default_language: default=self.code_mirror_safe_mode(self.default_language)
-        else: default="text/plain"
-        self.render("static/templates/index.html", mode=default)
+        self.render("static/templates/index.html")
 
 class AboutHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
@@ -140,24 +118,20 @@ class PasteHandler(BaseHandler):
         word = json.loads(response.body)['word']
         file_body = self.request.arguments['body'][0]
         file_name = self.request.arguments['name'][0]
-        if file_name is "None": file_name=word
-        language_guessed = guess_lexer(file_body).name.lower()
+        try:
+            language_guessed = get_lexer_for_filename(file_name).name.lower()
+        except Exception:
+            language_guessed = guess_lexer(file_body).name.lower()
+        
+        file_name=word
         codemirror_mode = self.code_mirror_safe_mode(language_guessed)
+        
         snippets.insert({'title': file_name, 'mid' : word, 'body' : unicode(file_body, 'utf-8'), 'forks' : [], 'language': codemirror_mode})
         
-        if self.default_language: 
-            print self.default_language
-            show_default_prompt = False
-        else: show_default_prompt = True
+        self.finish(word)
         
-        self.render("static/templates/upload.html", name=file_name, code_html=file_body, mid = word, forked_from = None, language_guessed = codemirror_mode, show_default_prompt=show_default_prompt)
+        #self.render("static/templates/upload.html", name=file_name, code_html=file_body, mid = word, forked_from = None, language_guessed = codemirror_mode)
 
-class DefaultLanguageHandler(BaseHandler):
-    @tornado.web.asynchronous
-    def post(self):
-        self.set_secure_cookie("default_language", self.request.arguments['language'][0], expires_days=30)
-        print self.request.arguments['language']
-        self.finish("")
 class ViewHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def get(self, mid):
@@ -178,7 +152,7 @@ class ForkHandler(tornado.web.RequestHandler):
         raw_text = snippet_to_be_forked['body']
         parent_language = language=snippet_to_be_forked['language']
         name = "Fork of " + snippet_to_be_forked['title']
-        self.render("static/templates/fork.html", name=name, raw_text=raw_text, mid=mid, language=parent_language)
+        self.render("static/templates/fork.html", name=mid, raw_text=raw_text, mid=mid, language=parent_language)
     @tornado.web.asynchronous
     def post(self, parent_mid):
         client = tornado.httpclient.AsyncHTTPClient()
@@ -190,12 +164,13 @@ class ForkHandler(tornado.web.RequestHandler):
     def random_callback(self, parent_mid, response):
         word = json.loads(response.body)['word']
         text = self.request.arguments['body'][0]
-        name = self.request.arguments['name'][0]
         parent_language = snippets.find_one({'mid' : parent_mid}, {'language' : 1})['language']
-        _id = snippets.insert({'title': name, 'mid': word, 'language' : parent_language,'body': unicode(text, 'utf-8'), 'forks' : []})
+        _id = snippets.insert({'title': word, 'mid': word, 'language' : parent_language,'body': unicode(text, 'utf-8'), 'forks' : []})
         # `safe` turns on error-checking for the update request, so we print out the response.
         print snippets.update({'mid': parent_mid}, {"$push": {"forks" : ObjectId(_id)}}, safe=True)
-        self.render("static/templates/upload.html", name=name, code_html=text, mid = word, forked_from = parent_mid, fork_count=0, language_guessed=parent_language, show_default_prompt=False)
+        
+        #self.redirect("/" + word)
+        self.render("static/templates/upload.html", name=word, code_html=text, mid = word, forked_from = parent_mid, fork_count=0, language_guessed=parent_language, show_default_prompt=False)
 
 class ViewForksHandler(tornado.web.RequestHandler):
 	@tornado.web.asynchronous
@@ -203,9 +178,12 @@ class ViewForksHandler(tornado.web.RequestHandler):
         # We really should look into turning on indexing for the mids.
         # Mongo automatically indexes the ObjectIds, but it also lets 
         # you select multiple other indexes. I'll look into that.
-		snippet = snippets.find_one({'mid' : mid})
-		print snippet['forks']
-		self.finish("")
+		fork_list = []
+		the_snippet = snippets.find_one({'mid' : mid})
+		for thing in the_snippet['forks']:
+		  snippet = snippets.find_one({'_id' : thing})
+		  fork_list.append([snippet['title'], snippet['mid']])
+		self.render("static/templates/viewforks.html", forks=fork_list, title=the_snippet['title'])
 
 class StatsHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous

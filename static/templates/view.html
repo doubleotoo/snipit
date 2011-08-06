@@ -4,7 +4,6 @@
 
 {% block head %}
     <script src="{{ static_url('js/codemirror.js') }}"></script>
-    <link href="{{ static_url('css/codemirror.css') }}" rel="stylesheet" type="text/css">
     <script type="text/javascript" src="{{ static_url("copytoclip/copy.js") }}"></script>
         <script type="text/javascript">
         ZeroClipboard.setMoviePath( '{{ static_url("copytoclip/ZeroClipboard.swf") }}' );
@@ -20,17 +19,21 @@
 
 {% block bodyhooks %} style="" {% end %}
 {% block body %}
-    <div align="center" style="padding-top:10px;"><h1 style="text-shadow: 1px 1px 1px #fff">[Name Pending]</h1>
+    <div align="center" style="padding-top:10px;"><h1 style="text-shadow: 1px 1px 1px #fff">[<a href="http://www.google.com/search?q={{name}}" target="_blank" class="hover_link">{{ name }}</a>]</h1>
         <div id="d_clip_container" style="position:relative">
             
             <div id="d_clip_button" class="my_clip_button">Copy Link To Clipboard</div>
             <a class="my_clip_button" href="/fork/{{ mid }}">Fork This Snippet</a>
         </div>
-        
-
-        <div style="margin-top:20px;">{{ fork_count }} forks. 
+        <div style="margin-top:20px;">
+        {% if fork_count == 1 %}
+            1 fork.
+        {% end %}
+        {% if fork_count is not 1 %}
+            {{ fork_count }} forks.
+        {% end %}
         {% if fork_count is not 0 %}
-            - <a href="/viewforks/{{mid}}">View Forks</a>
+            - <a class="hover_link" href="/viewforks/{{mid}}">View Forks</a>
         {% end %}
         
         <br />

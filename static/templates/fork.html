@@ -4,12 +4,11 @@
 
 {% block head %}
     <script src="{{ static_url('js/codemirror.js') }}"></script>
-    <link href="{{ static_url('css/codemirror.css') }}" rel="stylesheet" type="text/css">
 {% end %}
 
-{% block bodyhooks %} style="" {% end %}
+{% block bodyhooks %}{% end %}
 {% block body %}
-    <div align="center" style="padding-top:10px;"><h1 class="header">[Name Pending]</h1>
+    <div align="center" style="padding-top:10px;"><h1 class="header">[<a href="http://www.google.com/search?q={{name}}" target="_blank" class="hover_link">{{ name }}</a>]</h1>
         <form id="fork" method="post" enctype="multipart/form-data" action="/fork/{{ mid }}">
             <input type="submit" class="my_clip_button" value="Fork"/>
             <div align="left" id="code_container" class="code_container">
@@ -28,10 +27,5 @@
         lineNumbers: true,
         mode: "{{ language }}"
       });
-        // For later use
-<!--      function selectTheme(node) {-->
-<!--        var theme = node.options[node.selectedIndex].innerHTML;-->
-<!--        editor.setOption("theme", theme);-->
-<!--      }-->
     </script> 
 {% end %}

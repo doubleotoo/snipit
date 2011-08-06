@@ -1,6 +1,6 @@
 /*
  * jQuery File Upload Plugin
- * Copyright 2011, Hunter Lang, Sebastian Tschan
+ * Copyright 2011, Sebastian Tschan, Hunter Lang
  */
 
 (function ($) {
@@ -52,9 +52,7 @@
                 multipart: true,
                 multiFileRequest: false,
                 withCredentials: false,
-                forceIframeUpload: false,
-                open: function (event, ui) 
-                {alert("OMFGHOLYSHIT");},
+                forceIframeUpload: false
             },
             documentListeners = {},
             dropZoneListeners = {},

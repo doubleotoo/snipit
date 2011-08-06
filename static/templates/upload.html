@@ -3,7 +3,6 @@
 {% block title %}{{ name }}{% end %}
 {% block head %}
     <script src="{{ static_url('js/codemirror.js') }}"></script>
-    <link href="{{ static_url('css/codemirror.css') }}" rel="stylesheet" type="text/css">
     <script type="text/javascript" src="{{ static_url("copytoclip/copy.js") }}"></script>
         <script type="text/javascript">
         ZeroClipboard.setMoviePath( '{{ static_url("copytoclip/ZeroClipboard.swf") }}' );
@@ -17,21 +16,8 @@
     </script>
 {% end %}
 {% block body %}
-    <div id="default_prompt" {%if not show_default_prompt %}style="display:none"{% end %}>
-        <div class="prompt">
-        <p style="margin:20px;padding-top:20px; font-size:11pt; line-height:120%;">You just created a snippet written in {{ language_guessed }}!</p>
-        
-        <form id="default_language_form" method="POST" enctype="multipart/form-data">
-   		   <input type="hidden" name="language" value="{{ language_guessed }}"/>
-    	   {{ xsrf_form_html() }}
-        </form>
-        
-        <div  id="forget_button" class="blue_button" style="margin-top:30px;">Forget It</div><div id="set_button" class="blue_button" style="margin-top:30px;">Set Default</div>
-        </div> 
-    </div>
-    
-    
-    <div id="content" {%if show_default_prompt %}style="opacity:0.0"{% end %}>
+ 
+    <div id="content">
         <div align="center" style="padding-top:10px;"><h1 style="text-shadow: 1px 1px 1px #fff">[Name Pending]</h1>
         <div id="d_clip_container" style="position:relative">
             <div id="d_clip_button" class="my_clip_button">Copy to Clipboard</div>
@@ -48,35 +34,11 @@
         </div>
     </div>
     
-    <script>
-    $('#set_button').click(function() {
-        $.post("/default_language", $("#default_language_form").serialize());
-        $('#default_prompt').fadeOut('slow', function() {});
-        $('#content').animate({
-            opacity: 1.0,
-        }, 1000, function() {
-            // Animation complete.
-        });
-    });
-    $('#forget_button').click(function() {
-        $('#default_prompt').fadeOut('slow', function() {});
-        $('#content').animate({
-            opacity: 1.0,
-        }, 1000, function() {
-            // Animation complete.
-        });
-    });    
-    </script>
     <script> 
       var editor = CodeMirror.fromTextArea(document.getElementById("codebox"), {
         lineNumbers: true,
         mode: "{{ language_guessed }}"
       });
-        // For later use
-<!--      function selectTheme(node) {-->
-<!--        var theme = node.options[node.selectedIndex].innerHTML;-->
-<!--        editor.setOption("theme", theme);-->
-<!--      }-->
         init();
     </script>
 
