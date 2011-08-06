@@ -1,15 +1,1 @@
-    <form id="editor_form" method="post" enctype="multipart/form-data" action="/paste">
-        <div id="code_container" class="code_container">
-            <textarea name="body" id="codebox">{{ code_html }}</textarea>
-        </div>
-        <input id="uploaded_file_name" type="hidden" name="name" value="{{ name }}"/>
-        {{ xsrf_form_html() }}
-    </form>
-
-    <script> 
-      var editor = CodeMirror.fromTextArea(document.getElementById("codebox"), {
-        lineNumbers: true,
-        mode: "{{ language_guessed }}",
-        onChange: textChanged
-      });
-    </script> 
+<form id="editor_form" method="post" enctype="multipart/form-data" action="/paste"><div id="code_container" class="code_container"><textarea name="body" id="codebox">{{ code_html }}</textarea></div><input id="uploaded_file_name" type="hidden" name="name" value="{{ name }}"/>{{ xsrf_form_html() }}</form><script> var editor = CodeMirror.fromTextArea(document.getElementById("codebox"), {lineNumbers: true,mode: "{{ language_guessed }}",onChange: textChanged});</script> 
