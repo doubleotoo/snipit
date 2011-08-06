@@ -28,7 +28,13 @@
         </div>
         
 
-        <div style="margin-top:20px;">{{ fork_count }} forks. 
+        <div style="margin-top:20px;">
+        {% if fork_count == 1 %}
+            1 fork.
+        {% end %}
+        {% if fork_count is not 1 %}
+            {{ fork_count }} forks.
+        {% end %}
         {% if fork_count is not 0 %}
             - <a class="hover_link" href="/viewforks/{{mid}}">View Forks</a>
         {% end %}
