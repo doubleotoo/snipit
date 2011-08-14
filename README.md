@@ -13,7 +13,7 @@ However, it has a few defining and unique characteristics.
     not a random number sequence.
 *	 *Opensource (obviously)*
 *	 *Automatic syntax highlighting*
-*	 *Advanced and usable code editor, _not_ a textarea*
+*	 *Advanced and usable code editor, _not_ a &lt;textarea&gt;*
 	 
     We use [CodeMirror](http://codemirror.net), a popular JavaScript code editor with built in syntax highlighting and auto-indentation.
 *	 *Simple, streamlined user interface*
@@ -35,11 +35,13 @@ In the production branch, we implement the [nginx](http://nginx.org) web server 
 Install and Production
 ---------------
 
-To install, just download the tarball, cd to the directory, and 
+To install, first make sure you have tornado and mongo installed, and that mongod is running on localhost. Then: 
 
+    curl -L https://github.com/hunterlang/snippet.io/tarball/master | tar zx
+    cd hunterlang-snippet.io-889ba8c
     python server.py
 
-Make sure you have tornado installed, and mongod running on localhost:27017
+The name of the directory in step 2 may vary, just change the text after _cd_ accordingly.
 
 If you choose to run this app in production, you should load balance behind nginx, and use the nginx upload module.
 The tornado support for the upload module is located in the production branch, but the branch doesn't work out of the box, as it requires
