@@ -27,13 +27,16 @@ However, it has a few defining and unique characteristics.
 Technology
 -----------
 Snippet Uploader is built to scale: it uses the [Tornado Web Framework](http://www.tornadoweb.org) to serve dynamic content.
+
 We also use [MongoDB](http://www.mongodb.org) to store all of our data.
+
 In the production branch, we implement the [nginx](http://nginx.org) web server to serve static files, and the nginx upload module to handle file uploads.
 
 Install and Production
 ---------------
 
 To install, just download the tarball, cd to the directory, and 
+
     python server.py
 
 Make sure you have tornado installed, and mongod running on localhost:27017
