@@ -7,6 +7,7 @@ import logging
 import json
 import re
 import sys
+import uuid
 import os.path
 import functools
 import tornado.httpserver
@@ -51,6 +52,8 @@ class Application(tornado.web.Application):
 			(r"/viewforks/([\w-]+)", ViewForksHandler),
 			(r"/([\w-]+)", ViewHandler),
 			(r"/fork/([\w-]+)", ForkHandler),
+                        (r"/live/([\w-]+)", LiveHandler),
+                        (r"/updates/([\w-]+)", UpdatesHandler),
 			
         ]
         settings = dict(
@@ -187,6 +190,75 @@ class ViewForksHandler(tornado.web.RequestHandler):
 		  fork_list.append([snippet['title'], snippet['mid']])
 		self.render("static/templates/viewforks.html", forks=fork_list, title=the_snippet['title'])
 
+# BEGIN LIVE COLLAB BLOCK
+
+class LiveMixin(object):
+    """
+        Magical unicorn that does magical things.
+        This is a serious part of the server. Try not to fuck with it.
+        
+        See method docstrings below for a real explanation.
+    """
+    
+    waiters = []
+    cache = []
+    cache_size = 200
+    
+        
+    def wait_for_comments(self, callback, discussion_id, cursor=None):
+        cls = LiveMixin
+        if cursor:
+            index = 0
+            for i in xrange(len(cls.cache)):
+                index = len(cls.cache) - i - 1
+                if cls.cache[index]["id"] == cursor: break
+            recent = cls.cache[index + 1:]
+            if recent:
+                callback(recent)
+                return
+        cls.waiters.append([callback, discussion_id])
+
+    def new_comments(self, comments):
+        cls = LiveMixin
+        for callback in cls.waiters:
+            try:
+                comment_list = []
+                for comment in comments:
+                    if callback[1] == comment["discussion_id"]:
+                            callback[0]([comment])
+            except:
+                logging.error("Error in waiter callback", exc_info=True)
+        cls.waiters = []
+        cls.cache.extend(comments)
+        if len(cls.cache) > self.cache_size:
+            cls.cache = cls.cache[-self.cache_size:]
+
+class LiveHandler(tornado.web.RequestHandler, LiveMixin):
+    @tornado.web.asynchronous
+    def get(self, wid):
+        snippet = snippets.find_one({'mid':wid})
+        self.render('static/templates/live.html', word=wid, code = snippet['body'], mode=snippet['language'], poster_id=str(uuid.uuid4()))
+
+    def post(self, wid):
+        print wid
+        post = {
+            "body": self.request.arguments['body'][0],
+            "discussion_id": wid,
+            "poster_id": self.request.arguments['poster_id'][0]
+        }
+        self.new_comments([post])
+
+class UpdatesHandler(tornado.web.RequestHandler, LiveMixin):
+    @tornado.web.asynchronous
+    def post(self, wid):
+        cursor = self.get_argument('cursor', None)
+        self.wait_for_comments(self.async_callback(self.on_new_text), wid, cursor=cursor)
+    def on_new_text(self, post):
+
+        self.finish(post[0])
+
+# END LIVE COLLAB BLOCK
+
 class StatsHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def get(self):
@@ -204,7 +276,7 @@ if __name__ == "__main__":
     tornado.options.parse_command_line()
     MONGO_SERVER = "mongodb://aroman:%s@dbh23.mongolab.com:27237/struts" % options.password
     try:
-        connection = Connection(MONGO_SERVER)
+        connection = Connection('localhost', 27017)
         db = connection['struts'] # ~= database name
         snippets = db['snippets'] # ~= database table
         logging.info("Connected to database")

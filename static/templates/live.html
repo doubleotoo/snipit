@@ -1,0 +1,57 @@
+{% extends base.html %}
+
+{% block title %}{{ word }} - Live{% end %}
+
+{% block head %}
+    <script src="{{ static_url('js/codemirror.js') }}"></script>
+    <script src="{{ static_url('js/jquery.fileupload-ui.js') }}"></script>
+    <script src="{{ static_url('js/jquery.fileupload.js') }}"></script>
+    <link href="{{ static_url('css/codemirror.css') }}" rel="stylesheet" type="text/css">
+{% end %}
+
+{% block body %}
+
+    <form id="editor_form" method="post" enctype="multipart/form-data" action="/paste">
+        <div id="code_container" class="code_container" style="height:85%;margin-top:10px;">
+            <textarea name="body" id="codebox">{{ code }} </textarea>
+        </div>
+        <input id="poster_id" type="hidden" name="poster_id" value="{{ poster_id }}"/>
+
+	{{ xsrf_form_html() }}
+
+    </form>
+<script type="text/javascript">
+      function newRequest() {
+          $.post('/updates/' + '{{ word }}', {}, function(data){
+              if (editor.getValue() !== data['body'] && data['poster_id'] !== $("#poster_id").val()) {
+                  var curs = editor.getCursor();
+                  editor.setValue(data['body']);
+                  editor.setCursor(curs);
+              }
+              newRequest();
+          });          
+      }
+      function firstReq() {
+          var t = setTimeout("newRequest()", 1000);
+      }
+      firstReq();
+
+	// Inject codemirror into the textarea and configure it.
+        var editor = CodeMirror.fromTextArea(document.getElementById("codebox"), {
+            lineNumbers: true,
+            onKeyEvent: textChanged,
+            mode: '{{ mode }}'
+        });
+	var count = 0;
+        // Handle changes to editor's content.
+        function textChanged(editor) {
+            count +=1;
+	    if (count === 4) {
+                count = 0;
+	        $.post('/live/' + '{{ word }}', {"body" : editor.getValue(), "poster_id": $("#poster_id").val()});
+	    }
+        }
+
+</script>
+
+{% end %}
