@@ -46,3 +46,6 @@ The name of the directory in step 2 may vary, just change the text after _cd_ ac
 If you choose to run this app in production, you should load balance behind nginx, and use the nginx upload module.
 The tornado support for the upload module is located in the production branch, but the branch doesn't work out of the box, as it requires
 a specific nginx configuration. If you would like to see our config file, shoot me an email at [hunterlang@comcast.net](mailto:hunterlang@comcast.net)
+
+Our infrastructure is as follows:
+![Infrastructure Diagram](http://snip.hunterlang.com/static/img/diagram2.png)
