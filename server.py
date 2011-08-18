@@ -43,7 +43,7 @@ class Application(tornado.web.Application):
         # can have dashes in them.
         handlers = [
 			(r"/", IndexHandler),
-            (r"/about", AboutHandler),
+                        (r"/about", AboutHandler),
 			(r"/upload", UploadHandler),
 			(r"/paste", PasteHandler),
 			(r"/stats", StatsHandler),
@@ -52,6 +52,7 @@ class Application(tornado.web.Application):
 			(r"/fork/([\w-]+)", ForkHandler),
                         (r"/live/([\w-]+)", LiveHandler),
                         (r"/updates/([\w-]+)", UpdatesHandler),
+                        (r"/side/([\w-]+)\+([\w-]+)", SideHandler),
 			
         ]
         settings = dict(
@@ -258,6 +259,16 @@ class UpdatesHandler(tornado.web.RequestHandler, LiveMixin):
         self.finish(post[0])
 
 # END LIVE COLLAB BLOCK
+
+class SideHandler(tornado.web.RequestHandler):
+    @tornado.web.asynchronous
+    def get(self, forked_from_wid, fork_wid):
+        print forked_from_wid, fork_wid
+        forked_from =  snippets.find_one({"mid":forked_from_wid})
+        fork = snippets.find_one({"mid":fork_wid})
+        print forked_from, fork
+        self.render("static/templates/side.html", forked_from_dict=forked_from, fork_dict=fork)
+
 def main():
     http_server = tornado.httpserver.HTTPServer(Application(), xheaders=True) # enables headers so it can be run behind nginx
     http_server.listen(options.port)

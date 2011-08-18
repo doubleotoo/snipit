@@ -1,0 +1,68 @@
+{% extends base.html %}
+{% block title %}{{ forked_from_dict['title'] }} + {{ fork_dict['title']}}{% end %}
+{% block head %}
+    <script src="{{ static_url('js/codemirror.js') }}"></script>
+    <link href="{{ static_url('css/codemirror.css') }}" rel="stylesheet" type="text/css">
+    <style type="text/css">
+      #wrapper {
+      text-align: left;
+      margin: 0px auto;
+      padding: 0px;
+      border:0;
+      width: 1400px;
+    }
+
+#side-a {
+      float: left;
+      width: 700px;
+}
+
+#side-b { 
+      margin: 0;
+      float: left;
+      width: 700px;
+      height: 1% /* Holly hack for Peekaboo Bug */
+}
+
+</style>
+{% end %}
+{% block body %}
+    
+<div id="wrapper">
+  <div id="container">
+    <div id="side-a">
+      <div align="center" style="padding-top:10px;">
+	<h1>[<a href="/{{forked_from_dict['title']}}" class="hover_link">{{ forked_from_dict['title'] }}</a>]</h1>
+
+	<div id="left_code" class="code_container" style="text-align:left;width:690px; height:800px">
+	  <textarea name="code" id="forked_from_code">{{ forked_from_dict['body'] }}</textarea>
+	</div>
+      </div>
+    </div>
+    
+    <div id="side-b">
+      <div align="center" style="padding-top:10px;">
+	<h1>[<a href="/{{fork_dict['title']}}" class="hover_link">{{ fork_dict['title'] }}</a>]</h1>
+	<div id="right_code" class="code_container" style="text-align:left;height:800px; width:700px">
+	  <textarea name="other_code" id="fork_code">{{ fork_dict['body'] }}</textarea>
+	</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+  // Inject codemirror into the textarea and configure it.
+     var forked_from = CodeMirror.fromTextArea(document.getElementById("forked_from_code"), {
+         lineNumbers: true,
+         mode: '{{ forked_from_dict["language"] }}'
+     });
+    
+  // Inject codemirror into the textarea and configure it.
+     var fork = CodeMirror.fromTextArea(document.getElementById("fork_code"), {
+         lineNumbers: true,
+         mode: '{{ fork_dict["language"] }}'
+     });
+
+</script>
+
+{% end %}
