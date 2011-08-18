@@ -35,7 +35,7 @@ VID = "5d7251322785b49fdf58d1f6fed01ada9d31a71c3ae369557"
 
 define("port", default=8888, help="run on the given port", type=int)
 define("password", default=None, help="MongoDB password", type=str, metavar="PASSWORD")
-
+updates_feed_server = 'http://localhost:9300'
 
 # This defines the applications routes
 class Application(tornado.web.Application):
@@ -44,16 +44,16 @@ class Application(tornado.web.Application):
         # The - is because the wordnik words
         # can have dashes in them.
         handlers = [
-			(r"/", IndexHandler),
+
+            (r"/", IndexHandler),
             (r"/about", AboutHandler),
-			(r"/file_upload", UploadHandler),
-			(r"/paste", PasteHandler),
-			(r"/stats", StatsHandler),
-			(r"/viewforks/([\w-]+)", ViewForksHandler),
-			(r"/([\w-]+)", ViewHandler),
-			(r"/fork/([\w-]+)", ForkHandler),
-                        (r"/live/([\w-]+)", LiveHandler),
-                        (r"/updates/([\w-]+)", UpdatesHandler),
+	    (r"/file_upload", UploadHandler),
+	    (r"/paste", PasteHandler),
+	    (r"/stats", StatsHandler),
+	    (r"/viewforks/([\w-]+)", ViewForksHandler),
+	    (r"/([\w-]+)", ViewHandler),
+	    (r"/fork/([\w-]+)", ForkHandler),
+            (r"/live/([\w-]+)", LiveHandler),
 			
         ]
         settings = dict(
@@ -129,8 +129,7 @@ class PasteHandler(BaseHandler):
             language_guessed = guess_lexer(file_body).name.lower()
         
         file_name=word
-        codemirror_mode = self.code_mirror_safe_mode(language_guessed)
-        
+        codemirror_mode = self.code_mirror_safe_mode(language_guessed)        
         snippets.insert({'title': file_name, 'mid' : word, 'body' : unicode(file_body, 'utf-8'), 'forks' : [], 'language': codemirror_mode})
         
         self.finish(word)
@@ -192,70 +191,32 @@ class ViewForksHandler(tornado.web.RequestHandler):
 
 # BEGIN LIVE COLLAB BLOCK
 
-class LiveMixin(object):
-    """
-        Magical unicorn that does magical things.
-        This is a serious part of the server. Try not to fuck with it.
-        
-        See method docstrings below for a real explanation.
-    """
-    
-    waiters = []
-    cache = []
-    cache_size = 200
-    
-        
-    def wait_for_comments(self, callback, discussion_id, cursor=None):
-        cls = LiveMixin
-        if cursor:
-            index = 0
-            for i in xrange(len(cls.cache)):
-                index = len(cls.cache) - i - 1
-                if cls.cache[index]["id"] == cursor: break
-            recent = cls.cache[index + 1:]
-            if recent:
-                callback(recent)
-                return
-        cls.waiters.append([callback, discussion_id])
-
-    def new_comments(self, comments):
-        cls = LiveMixin
-        for callback in cls.waiters:
-            try:
-                comment_list = []
-                for comment in comments:
-                    if callback[1] == comment["discussion_id"]:
-                            callback[0]([comment])
-            except:
-                logging.error("Error in waiter callback", exc_info=True)
-        cls.waiters = []
-        cls.cache.extend(comments)
-        if len(cls.cache) > self.cache_size:
-            cls.cache = cls.cache[-self.cache_size:]
-
-class LiveHandler(tornado.web.RequestHandler, LiveMixin):
+class LiveHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
+    
+    # This is the only method still needed. All other live-related actions are forwarded to live.py
+    # by nginx.
     def get(self, wid):
-        snippet = snippets.find_one({'mid':wid})
-        self.render('static/templates/live.html', word=wid, code = snippet['body'], mode=snippet['language'], poster_id=str(uuid.uuid4()))
+        client = tornado.httpclient.AsyncHTTPClient()
+        request_url = "http://localhost:9300/updates/cache/" + wid
+        headers = {"Content-Type" : "application/json"}
+        request = tornado.httpclient.HTTPRequest(request_url, headers=headers)
+        client.fetch(request, functools.partial(self.on_response, wid))
 
-    def post(self, wid):
-        print wid
-        post = {
-            "body": self.request.arguments['body'][0],
-            "discussion_id": wid,
-            "poster_id": self.request.arguments['poster_id'][0]
-        }
-        self.new_comments([post])
+    def on_response(self, wid, response):
+        try:
+            body = json.loads(response.body)['cache']['body']
+        except TypeError:
+            body = ""
+        
+        snippet = snippets.find_one({ 'mid':wid })
+        stored_body = snippet['body']
+        
+        if not body is "" and not body == stored_body:
+            stored_body = body
+            
 
-class UpdatesHandler(tornado.web.RequestHandler, LiveMixin):
-    @tornado.web.asynchronous
-    def post(self, wid):
-        cursor = self.get_argument('cursor', None)
-        self.wait_for_comments(self.async_callback(self.on_new_text), wid, cursor=cursor)
-    def on_new_text(self, post):
-
-        self.finish(post[0])
+        self.render('static/templates/live.html', word=wid, code = stored_body, mode=snippet['language'], poster_id=str(uuid.uuid4()))
 
 # END LIVE COLLAB BLOCK
 

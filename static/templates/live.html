@@ -48,7 +48,7 @@
             count +=1;
 	    if (count === 4) {
                 count = 0;
-	        $.post('/live/' + '{{ word }}', {"body" : editor.getValue(), "poster_id": $("#poster_id").val()});
+	        $.post('/updates/live/' + '{{ word }}', {"body" : editor.getValue(), "poster_id": $("#poster_id").val()});
 	    }
         }
 
