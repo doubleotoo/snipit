@@ -7,19 +7,28 @@ General
 This is a very concise tornado application that basically functions as a pastebin.
 However, it has a few defining and unique characteristics.
 
-*	 *Memorable URL's*
+*	 <b>Live Collaboration</b>
+
+	 Using the power of tornado, we made it easy to collaborate with other people on a snippet in real time.
+
+*	 <b>Memorable URL's</b>
 	 
     We use a custom wrapper around the [Wordnik](http://www.wordnik.com) API to generate a memorable URL, 
     not a random number sequence.
-*	 *Opensource (obviously)*
-*	 *Automatic syntax highlighting*
-*	 *Advanced and usable code editor, _not_ a &lt;textarea&gt;*
+
+*   	 <b>Side-by-side Comparison</b>
+	 
+	 Easily view two snippets right next to each other for maximum comparison functionality.
+
+*	 <b>Open source (obviously)</b>
+*	 <b>Automatic syntax highlighting</b>
+*	 <b>Advanced and usable code editor, _not_ a &lt;textarea&gt;</b>
 	 
     We use [CodeMirror](http://codemirror.net), a popular JavaScript code editor with built in syntax highlighting and auto-indentation.
-*	 *Simple, streamlined user interface*
+*	 <b>Simple, streamlined user interface</b>
 
     Programmers are notorious for designing terrible interfaces, but we think we did a pretty good job with this one.
-*	*Significantly enhances your vocabulary*
+*	<b>Significantly enhances your vocabulary</b>
 
     Since every upload is linked to a unique word, hopefully you'll learn some new terms to flaunt! :D
 
