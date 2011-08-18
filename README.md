@@ -9,7 +9,7 @@ However, it has a few defining and unique characteristics.
 
 *	 <b>Live Collaboration</b>
 
-	 Using the power of tornado, we made it easy to collaborate with other people on a snippet in real time.
+	 Using the power of [Tornado](http://www.tornadoweb.org/), we made it easy to collaborate in real time on a snippet.
 
 *	 <b>Memorable URL's</b>
 	 
@@ -18,7 +18,7 @@ However, it has a few defining and unique characteristics.
 
 *   	 <b>Side-by-side Comparison</b>
 	 
-	 Easily view two snippets right next to each other for maximum comparison functionality.
+ Easily view two snippets right next to each other for maximum comparison functionality.
 
 *	 <b>Open source (obviously)</b>
 *	 <b>Automatic syntax highlighting</b>
