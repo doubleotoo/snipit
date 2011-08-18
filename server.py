@@ -54,6 +54,7 @@ class Application(tornado.web.Application):
 	    (r"/([\w-]+)", ViewHandler),
 	    (r"/fork/([\w-]+)", ForkHandler),
             (r"/live/([\w-]+)", LiveHandler),
+            (r"/side/([\w-]+)\+([\w-]+)", SideHandler),
 			
         ]
         settings = dict(
@@ -219,6 +220,18 @@ class LiveHandler(tornado.web.RequestHandler):
         self.render('static/templates/live.html', word=wid, code = stored_body, mode=snippet['language'], poster_id=str(uuid.uuid4()))
 
 # END LIVE COLLAB BLOCK
+
+
+class SideHandler(tornado.web.RequestHandler):
+    @tornado.web.asynchronous
+    def get(self, forked_from_wid, fork_wid):
+        print forked_from_wid, fork_wid
+        forked_from =  snippets.find_one({"mid":forked_from_wid})
+        fork = snippets.find_one({"mid":fork_wid})
+        print forked_from, fork
+        
+        self.render("static/templates/side.html", forked_from_dict=forked_from, fork_dict=fork)
+        
 
 class StatsHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
