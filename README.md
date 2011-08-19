@@ -16,9 +16,9 @@ However, it has a few defining and unique characteristics.
     We use a custom wrapper around the [Wordnik](http://www.wordnik.com) API to generate a memorable URL, 
     not a random number sequence.
 
-*   	 <b>Side-by-side Comparison</b>
+*	 <b>Side-by-side Comparison</b>
 	 
- Easily view two snippets right next to each other for maximum comparison functionality.
+ 	Easily view two snippets right next to each other for maximum comparison functionality.
 
 *	 <b>Open source (obviously)</b>
 *	 <b>Automatic syntax highlighting</b>
