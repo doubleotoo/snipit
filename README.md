@@ -28,7 +28,7 @@ However, it has a few defining and unique characteristics.
     Programmers are notorious for designing terrible interfaces, but we think we did a decent job with this one.
 *	<b>Significantly enhances your vocabulary</b>
 
-    Since every upload is linked to a unique word, hopefully you'll learn some new terms to flaunt! :D
+    Since every snippet is linked to a unique word, hopefully you'll learn some new terms to flaunt! :D
 
 *	 <b>Open source (obviously)</b>
 *	 <b>Automatic syntax highlighting</b>
