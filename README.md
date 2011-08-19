@@ -35,28 +35,13 @@ However, it has a few defining and unique characteristics.
 
 
 
-Technology
+Technology and Infrastructure
 -----------
 Snippet Uploader is built to scale: it uses the [Tornado Web Framework](http://www.tornadoweb.org) to serve dynamic content.
 
 We also use [MongoDB](http://www.mongodb.org) to store all of our data.
 
 In the production branch, we implement the [nginx](http://nginx.org) web server to serve static files, and the nginx upload module to handle file uploads.
-
-Install and Production
----------------
-
-To install, first make sure you have tornado and mongo installed, and that mongod is running on localhost. Then: 
-
-    curl -L https://github.com/hunterlang/snippet.io/tarball/master | tar zx
-    cd hunterlang-snippet.io-889ba8c
-    python server.py
-
-The name of the directory in step 2 may vary, just change the text after _cd_ accordingly.
-
-If you choose to run this app in production, you should load balance behind nginx, and use the nginx upload module.
-The tornado support for the upload module is located in the production branch, but the branch doesn't work out of the box, as it requires
-a specific nginx configuration. If you would like to see our config file, shoot me an email at [hunterlang@comcast.net](mailto:hunterlang@comcast.net)
 
 Our infrastructure is as follows:
 ![Infrastructure Diagram](http://snip.hunterlang.com/static/img/diagram2.png)
