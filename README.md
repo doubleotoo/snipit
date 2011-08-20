@@ -20,6 +20,10 @@ However, it has a few defining and unique characteristics.
 	 
  	Easily view two snippets right next to each other for maximum comparison functionality.
 
+*	 <b>Github-style Forking</b>
+	 
+    All snippets can be forked by other users, allowing them to create their own unique versions of a snippet.
+
 *	 <b>Advanced and usable code editor, _not_ a &lt;textarea&gt;</b>
 	 
     We use [CodeMirror](http://codemirror.net), a popular JavaScript code editor with built in syntax highlighting and auto-indentation.
