@@ -56,6 +56,7 @@ class Application(tornado.web.Application):
 	    (r"/fork/([\w-]+)", ForkHandler),
             (r"/live/([\w-]+)", LiveHandler),
             (r"/side/([\w-]+)\+([\w-]+)", SideHandler),
+            (r"/body/([\w-]+)", BodyHandler)
 			
         ]
         settings = dict(
@@ -231,6 +232,16 @@ class StatsHandler(tornado.web.RequestHandler):
         self.render("static/templates/stats.html", 
                     top_snippets=top_snippets, total_snippets=total_snippets)
 
+# This class simply returns a JSON object containing
+# the body of a requested snippet.
+class BodyHandler(tornado.web.RequestHandler):
+    @tornado.web.asynchronous
+    def get(self, mid):
+        try:
+            snippet = snippets.find_one({"mid" : mid})["body"]
+            self.finish(json.dumps({"body":snippet}))
+        except TypeError:
+            self.finish("No snippet with mid " + mid + " found.")
 def main():
     # enables headers so it can be run behind nginx
     http_server = tornado.httpserver.HTTPServer(Application(), xheaders=True) 
