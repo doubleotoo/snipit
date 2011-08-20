@@ -46,14 +46,14 @@ class Application(tornado.web.Application):
             (r"/about", AboutHandler),
             (r"/upload", UploadHandler),
             (r"/paste", PasteHandler),
-            (r"/stats", StatsHandler),
-            (r"/viewforks/([\w-]+)", ViewForksHandler),
-            (r"/([\w-]+)", ViewHandler),
-            (r"/fork/([\w-]+)", ForkHandler),
+	    (r"/stats", StatsHandler),
+	    (r"/viewforks/([\w-]+)", ViewForksHandler),
+	    (r"/([\w-]+)", ViewHandler),
+	    (r"/fork/([\w-]+)", ForkHandler),
             (r"/live/([\w-]+)", LiveHandler),
             (r"/updates/([\w-]+)", UpdatesHandler),
             (r"/side/([\w-]+)\+([\w-]+)", SideHandler),
-            (r"/body/([\w-]+)", BodyHandler)
+            (r"/body/([\w-]+)", BodyHandler)           
 			
         ]
         settings = dict(

@@ -1,19 +1,28 @@
 {% extends base.html %}
 
 {% block title %}{{ word }} - Live{% end %}
-
 {% block head %}
     <script src="{{ static_url('js/codemirror.js') }}"></script>
-    <script src="{{ static_url('js/jquery.fileupload-ui.js') }}"></script>
-    <script src="{{ static_url('js/jquery.fileupload.js') }}"></script>
     <link href="{{ static_url('css/codemirror.css') }}" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="{{ static_url("copytoclip/copy.js") }}"></script>
+    <!-- sry for the super long line. -->
+    <script type="text/javascript">ZeroClipboard.setMoviePath( '{{ static_url("copytoclip/ZeroClipboard.swf") }}' );var clip = null;function init(){clip = new ZeroClipboard.Client();clip.setHandCursor( true );clip.glue( 'd_clip_button', 'd_clip_container' );clip.setText("{{ SITE_ROOT }}/live/{{word}}");}; </script>
 {% end %}
 
 {% block body %}
-
+<div align="center" style="padding-top:10px;">
+  <h1 style="text-shadow: 1px 1px 1px #fff">
+    [<a href="/live/{{ word }}" class="hover_link">{{ word }} : Live</a>]
+  </h1>
+  <div id="d_clip_container" style="position:relative">
+    <div id="d_clip_button" class="my_clip_button">Copy Link To Clipboard</div>
+    <a class="my_clip_button" id="forkbutton">Save Changes as new Fork</a>
+    <a class="my_clip_button" id="revert_button">Revert to Stored Version</a>
+  </div>
+</div>
     <form id="editor_form" method="post" enctype="multipart/form-data" action="/paste">
-        <div id="code_container" class="code_container" style="height:85%;margin-top:10px;">
-            <textarea name="body" id="codebox">{{ code }} </textarea>
+        <div id="code_container" class="code_container" style="height:65%;margin-top:30px;">
+            <textarea name="body" id="codebox">{{ code }}</textarea>
         </div>
         <input id="poster_id" type="hidden" name="poster_id" value="{{ poster_id }}"/>
 
@@ -34,6 +43,17 @@
       function firstReq() {
           var t = setTimeout("newRequest()", 1000);
       }
+      $("#forkbutton").click(function(){
+          $.post("/fork/{{ word }}", {"body":editor.getValue()}, function(data){document.location = data});
+      });
+      $("#revert_button").click(function(){
+          $.get("/body/{{ word }}", function(data){
+              curs = editor.getCursor();
+              var obj = jQuery.parseJSON(data);
+              editor.setValue(obj.body);
+              editor.setCursor(curs);
+          });
+      });
       firstReq();
 
 	// Inject codemirror into the textarea and configure it.
@@ -48,10 +68,9 @@
             count +=1;
 	    if (count === 4) {
                 count = 0;
-	        $.post('/live/' + '{{ word }}', {"body" : editor.getValue(), "poster_id": $("#poster_id").val()});
+	        $.post('/updates/live/' + '{{ word }}', {"body" : editor.getValue(), "poster_id": $("#poster_id").val()});
 	    }
         }
-
+      init();
 </script>
-
 {% end %}
