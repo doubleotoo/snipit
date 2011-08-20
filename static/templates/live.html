@@ -1,7 +1,6 @@
 {% extends base.html %}
 
 {% block title %}{{ word }} - Live{% end %}
-
 {% block head %}
     <script src="{{ static_url('js/codemirror.js') }}"></script>
     <link href="{{ static_url('css/codemirror.css') }}" rel="stylesheet" type="text/css">
@@ -13,7 +12,7 @@
 {% block body %}
 <div align="center" style="padding-top:10px;">
   <h1 style="text-shadow: 1px 1px 1px #fff">
-    [<a href="/{{ word }}" target="_blank" class="hover_link">{{ word }} : Live</a>]
+    [<a href="/live/{{ word }}" class="hover_link">{{ word }} : Live</a>]
   </h1>
   <div id="d_clip_container" style="position:relative">
     <div id="d_clip_button" class="my_clip_button">Copy Link To Clipboard</div>
