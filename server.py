@@ -9,7 +9,6 @@ import re
 import sys
 import uuid
 import os.path
-import functools
 import tornado.httpserver
 import tornado.httpclient
 import tornado.ioloop
@@ -34,7 +33,6 @@ from pymongo import ASCENDING, DESCENDING
 
 define("port", default=8888, help="run on the given port", type=int)
 
-updates_feed_server = 'http://localhost:9300'
 VID = "5d7251322785b49fdf58d1f6fed01ada9d31a71c3ae369557"
 wordnik_request_url = "http://api.wordnik.com/v4/words.json/randomWord?includePartOfSpeech=adjective&maxLength=18&minLength=2"
 
@@ -65,6 +63,7 @@ class Application(tornado.web.Application):
         tornado.web.Application.__init__(self, handlers, autoescape=None, **settings) 
 
 class BaseHandler(tornado.web.RequestHandler):
+    #should i put @tornado.web.asynchronous here?
     def code_mirror_safe_mode(self, language):
         if language == "python":mode = "python"
         elif language == "php":mode = "application/x-httpd-php"
@@ -79,9 +78,9 @@ class BaseHandler(tornado.web.RequestHandler):
         elif language == "objc":mode = "text/x-csrc"
         else: mode="text/plain"
         return mode
-    def get_wordnik_word(self, callback, parent_mid=None):
+    #should i put @tornado.web.asynchronous here?
+    def external_api_request(self, callback, request_url):
         client = tornado.httpclient.AsyncHTTPClient()
-        request_url = wordnik_request_url
         headers = {"Content-Type" : "application/json", "api_key" : VID}
         request = tornado.httpclient.HTTPRequest(request_url, headers=headers)
         client.fetch(request, callback)
@@ -124,7 +123,7 @@ class UploadHandler(BaseHandler):
 class PasteHandler(BaseHandler):
     @tornado.web.asynchronous
     def post(self):
-        self.get_wordnik_word(self.random_callback)
+        self.external_api_request(self.random_callback, wordnik_request_url)
 
     def random_callback(self, response):
         word = json.loads(response.body)['word']
@@ -160,7 +159,7 @@ class ViewHandler(tornado.web.RequestHandler):
 class ForkHandler(BaseHandler):
     @tornado.web.asynchronous
     def post(self, parent_mid):
-        self.get_wordnik_word(self.random_callback)
+        self.external_api_request(self.random_callback, wordnik_request_url)
 
     def random_callback(self, response):
         parent_mid = self.request.uri.split('/')[2]
@@ -189,26 +188,21 @@ class ViewForksHandler(tornado.web.RequestHandler):
             self.render("static/templates/viewforks.html", forks=fork_list, title=the_snippet['title'])
 
 # BEGIN LIVE COLLAB BLOCK
-class LiveHandler(tornado.web.RequestHandler):
+class LiveHandler(BaseHandler):
     @tornado.web.asynchronous
     # This is the only method still needed. All other live-related actions are forwarded to live.py
     # by nginx.
     def get(self, wid):
-        client = tornado.httpclient.AsyncHTTPClient()
-        request_url = "http://localhost:9300/updates/cache/" + wid
-        headers = {"Content-Type" : "application/json"}
-        request = tornado.httpclient.HTTPRequest(request_url, headers=headers)
-        client.fetch(request, functools.partial(self.on_response, wid))
+        self.external_api_request(self.on_response, "http://localhost:9300/updates/cache/" + wid)
 
-    def on_response(self, wid, response):
+    def on_response(self, response):
+        wid = self.request.uri.split("/")[2]
         try:
             body = json.loads(response.body)['cache']['body']
         except TypeError:
             body = ""
-        
         snippet = snippets.find_one({ 'mid':wid })
         stored_body = snippet['body']
-        
         if not body is "" and not body == stored_body:
             stored_body = body
         self.render('static/templates/live.html', word=wid, code = stored_body, 
