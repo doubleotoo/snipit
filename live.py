@@ -32,10 +32,7 @@ class Application(tornado.web.Application):
             (r"/updates/cache/([\w-]+)", CacheHandler),
 			
         ]
-        settings = dict(
-            debug = True, # For auto-reload
-        )
-        tornado.web.Application.__init__(self, handlers, **settings)
+        tornado.web.Application.__init__(self, handlers)
 
 # BEGIN LIVE COLLAB BLOCK
 

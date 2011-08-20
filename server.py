@@ -31,11 +31,12 @@ from pymongo import ASCENDING, DESCENDING
 # Don't use it in your own app. Get your own. They're free and 
 # available from right here: http://api.wordnik.com/signup/
 # Thanks.
-VID = "5d7251322785b49fdf58d1f6fed01ada9d31a71c3ae369557"
 
 define("port", default=8888, help="run on the given port", type=int)
-define("password", default=None, help="MongoDB password", type=str, metavar="PASSWORD")
+
 updates_feed_server = 'http://localhost:9300'
+VID = "5d7251322785b49fdf58d1f6fed01ada9d31a71c3ae369557"
+wordnik_request_url = "http://api.wordnik.com/v4/words.json/randomWord?includePartOfSpeech=adjective&maxLength=18&minLength=2"
 
 # This defines the applications routes
 class Application(tornado.web.Application):
@@ -58,11 +59,10 @@ class Application(tornado.web.Application):
 			
         ]
         settings = dict(
-            debug = True, # For auto-reload
             static_path = os.path.join(os.path.dirname(__file__), "static"),
-            cookie_secret = "72-OrTzKXeAGaYdkL5gEmGeKSFumh7Ec+p2XdTP1o/Vo=",
         )
-        tornado.web.Application.__init__(self, handlers, autoescape=None, **settings) # Disables auto escape in templates so xsrf works
+        tornado.web.Application.__init__(self, handlers, autoescape=None, **settings) 
+
 class BaseHandler(tornado.web.RequestHandler):
     def code_mirror_safe_mode(self, language):
         if language == "python":mode = "python"
@@ -78,6 +78,13 @@ class BaseHandler(tornado.web.RequestHandler):
         elif language == "objc":mode = "text/x-csrc"
         else: mode="text/plain"
         return mode
+    def get_wordnik_word(self, callback, parent_mid=None):
+        client = tornado.httpclient.AsyncHTTPClient()
+        request_url = wordnik_request_url
+        headers = {"Content-Type" : "application/json", "api_key" : VID}
+        request = tornado.httpclient.HTTPRequest(request_url, headers=headers)
+        client.fetch(request, callback)
+        
 class IndexHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def get(self):
@@ -95,7 +102,8 @@ class UploadHandler(BaseHandler):
         file_path = self.request.arguments['file_path'][0]
         self.ioloop = tornado.ioloop.IOLoop.instance()
         self.pipe = p = os.popen("sudo cat " + file_path)
-        self.ioloop.add_handler(p.fileno(), self.async_callback(self.on_response), self.ioloop.READ)
+        self.ioloop.add_handler(p.fileno(), 
+                    self.async_callback(self.on_response), self.ioloop.READ)
     
     def on_response(self, fd, events):
         file_name = self.request.arguments['file_name'][0]
@@ -109,16 +117,13 @@ class UploadHandler(BaseHandler):
         codemirror_mode = self.code_mirror_safe_mode(language_guessed)         
         self.ioloop.remove_handler(fd)
         
-        self.render("static/templates/codemirror.html", name=file_name,code_html=file_body, language_guessed = codemirror_mode)
+        self.render("static/templates/codemirror.html", name=file_name,
+                    code_html=file_body, language_guessed = codemirror_mode)
 
 class PasteHandler(BaseHandler):
     @tornado.web.asynchronous
     def post(self):
-        client = tornado.httpclient.AsyncHTTPClient()
-        request_url = "http://api.wordnik.com/v4/words.json/randomWord?includePartOfSpeech=adjective&maxLength=18&minLength=2"
-        headers = {"Content-Type" : "application/json", "api_key": VID}
-        request = tornado.httpclient.HTTPRequest(request_url, headers=headers)
-        client.fetch(request, self.random_callback)
+        self.get_wordnik_word(self.random_callback)
 
     def random_callback(self, response):
         word = json.loads(response.body)['word']
@@ -131,12 +136,11 @@ class PasteHandler(BaseHandler):
         
         file_name=word
         codemirror_mode = self.code_mirror_safe_mode(language_guessed)        
-        snippets.insert({'title': file_name, 'mid' : word, 'body' : unicode(file_body, 'utf-8'), 'forks' : [], 'language': codemirror_mode})
+        snippets.insert({'title': file_name, 'mid' : word, 'body' : unicode(file_body, 'utf-8'), 
+                         'forks' : [], 'language': codemirror_mode})
         
         self.finish(word)
         
-        #self.render("static/templates/upload.html", name=file_name, code_html=file_body, mid = word, forked_from = None, language_guessed = codemirror_mode)
-
 class ViewHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def get(self, mid):
@@ -148,34 +152,24 @@ class ViewHandler(tornado.web.RequestHandler):
             forked_from_mid = None
         fork_count = len(snippet['forks'])
         language = snippet['language']
-        self.render("static/templates/view.html", name = snippet['title'], code_html = snippet['body'], description = None, mid=mid, fork_count = fork_count, forked_from = forked_from_mid, mode=language)
+        self.render("static/templates/view.html", name = snippet['title'], code_html = snippet['body'], 
+                    description = None, mid=mid, fork_count = fork_count, 
+                    forked_from = forked_from_mid, mode=language)
 
-class ForkHandler(tornado.web.RequestHandler):
-    @tornado.web.asynchronous
-    def get(self, mid):
-        snippet_to_be_forked = snippets.find_one({'mid' : mid})
-        raw_text = snippet_to_be_forked['body']
-        parent_language = language=snippet_to_be_forked['language']
-        name = "Fork of " + snippet_to_be_forked['title']
-        self.render("static/templates/fork.html", name=mid, raw_text=raw_text, mid=mid, language=parent_language)
+class ForkHandler(BaseHandler):
     @tornado.web.asynchronous
     def post(self, parent_mid):
-        client = tornado.httpclient.AsyncHTTPClient()
-        request_url = "http://api.wordnik.com/v4/words.json/randomWord?includePartOfSpeech=adjective&maxLength=18&minLength=2"
-        headers = {"Content-Type" : "application/json", "api_key" : VID}
-        request = tornado.httpclient.HTTPRequest(request_url, headers=headers)
-        client.fetch(request, functools.partial(self.random_callback, parent_mid))
+        self.get_wordnik_word(self.random_callback)
 
-    def random_callback(self, parent_mid, response):
+    def random_callback(self, response):
+        parent_mid = self.request.uri.split('/')[2]
         word = json.loads(response.body)['word']
         text = self.request.arguments['body'][0]
         parent_language = snippets.find_one({'mid' : parent_mid}, {'language' : 1})['language']
-        _id = snippets.insert({'title': word, 'mid': word, 'language' : parent_language,'body': unicode(text, 'utf-8'), 'forks' : []})
-        # `safe` turns on error-checking for the update request, so we print out the response.
+        _id = snippets.insert({'title': word, 'mid': word, 'language' : parent_language,
+                               'body': unicode(text, 'utf-8'), 'forks' : []})
         print snippets.update({'mid': parent_mid}, {"$push": {"forks" : ObjectId(_id)}}, safe=True)
-        
-        self.redirect("/" + word)
-        #self.render("static/templates/upload.html", name=word, code_html=text, mid = word, forked_from = parent_mid, fork_count=0, language_guessed=parent_language, show_default_prompt=False)
+        self.finish("/" + word)
 
 class ViewForksHandler(tornado.web.RequestHandler):
 	@tornado.web.asynchronous
@@ -183,18 +177,19 @@ class ViewForksHandler(tornado.web.RequestHandler):
         # We really should look into turning on indexing for the mids.
         # Mongo automatically indexes the ObjectIds, but it also lets 
         # you select multiple other indexes. I'll look into that.
-		fork_list = []
-		the_snippet = snippets.find_one({'mid' : mid})
-		for thing in the_snippet['forks']:
-		  snippet = snippets.find_one({'_id' : thing})
-		  fork_list.append([snippet['title'], snippet['mid']])
-		self.render("static/templates/viewforks.html", forks=fork_list, title=the_snippet['title'])
+        
+        # 8/19/2011 - I turned on indexing for the mid key.
+        # It's now a B-Tree index. We should see a performance boost.
+            fork_list = []
+            the_snippet = snippets.find_one({'mid' : mid})
+            for thing in the_snippet['forks']:
+                snippet = snippets.find_one({'_id' : thing})
+                fork_list.append([snippet['title'], snippet['mid']])
+            self.render("static/templates/viewforks.html", forks=fork_list, title=the_snippet['title'])
 
 # BEGIN LIVE COLLAB BLOCK
-
 class LiveHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
-    
     # This is the only method still needed. All other live-related actions are forwarded to live.py
     # by nginx.
     def get(self, wid):
@@ -215,21 +210,16 @@ class LiveHandler(tornado.web.RequestHandler):
         
         if not body is "" and not body == stored_body:
             stored_body = body
-            
-
-        self.render('static/templates/live.html', word=wid, code = stored_body, mode=snippet['language'], poster_id=str(uuid.uuid4()))
+        self.render('static/templates/live.html', word=wid, code = stored_body, 
+                    mode=snippet['language'], poster_id=str(uuid.uuid4()))
 
 # END LIVE COLLAB BLOCK
-
 
 class SideHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def get(self, forked_from_wid, fork_wid):
-        print forked_from_wid, fork_wid
         forked_from =  snippets.find_one({"mid":forked_from_wid})
         fork = snippets.find_one({"mid":fork_wid})
-        print forked_from, fork
-        
         self.render("static/templates/side.html", forked_from_dict=forked_from, fork_dict=fork)
         
 
@@ -238,24 +228,20 @@ class StatsHandler(tornado.web.RequestHandler):
     def get(self):
         top_snippets = snippets.find().sort("forks", DESCENDING).limit(10)
         total_snippets = snippets.count()
-        self.render("static/templates/stats.html", top_snippets=top_snippets, total_snippets=total_snippets)
+        self.render("static/templates/stats.html", 
+                    top_snippets=top_snippets, total_snippets=total_snippets)
 
 def main():
-    http_server = tornado.httpserver.HTTPServer(Application(), xheaders=True) # enables headers so it can be run behind nginx
+    # enables headers so it can be run behind nginx
+    http_server = tornado.httpserver.HTTPServer(Application(), xheaders=True) 
     http_server.listen(options.port)
     logging.info("Serving on port %s" % options.port)
     tornado.ioloop.IOLoop.instance().start()
 
 if __name__ == "__main__":
     tornado.options.parse_command_line()
-    MONGO_SERVER = "mongodb://aroman:%s@dbh23.mongolab.com:27237/struts" % options.password
-    try:
-        connection = Connection('localhost', 27017)
-        db = connection['struts'] # ~= database name
-        snippets = db['snippets'] # ~= database table
-        logging.info("Connected to database")
-    except ConfigurationError:
-        logging.critical("Can't connect to database with password \"%s\"" % options.password)
-        # Terminate program with error return code.
-        sys.exit(1)
+    connection = Connection('localhost', 27017)
+    db = connection['struts'] # ~= database name
+    snippets = db['snippets'] # ~= database table
+    logging.info("Connected to database")
     main()
