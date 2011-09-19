@@ -215,7 +215,12 @@ class SideHandler(tornado.web.RequestHandler):
     def get(self, forked_from_wid, fork_wid):
         forked_from =  snippets.find_one({"mid":forked_from_wid})
         fork = snippets.find_one({"mid":fork_wid})
-        self.render("static/templates/side.html", forked_from_dict=forked_from, fork_dict=fork)
+        if forked_from and fork:
+            self.render("static/templates/side.html", forked_from_dict=forked_from, fork_dict=fork)
+        else:
+            self.send_error(404)
+    def get_error_html(self, status_code=404, **kwargs):
+        return "<html><head><title>404</title></head><body><div align='center'>These are not the droids you are looking for.</div></body></html>"
         
 
 class StatsHandler(tornado.web.RequestHandler):

@@ -5,8 +5,14 @@
     <script src="{{ static_url('js/codemirror.js') }}"></script>
     <link href="{{ static_url('css/codemirror.css') }}" rel="stylesheet" type="text/css">
     <script type="text/javascript" src="{{ static_url("copytoclip/copy.js") }}"></script>
-    <!-- sry for the super long line. -->
-    <script type="text/javascript">ZeroClipboard.setMoviePath( '{{ static_url("copytoclip/ZeroClipboard.swf") }}' );var clip = null;function init(){clip = new ZeroClipboard.Client();clip.setHandCursor( true );clip.glue( 'd_clip_button', 'd_clip_container' );clip.setText("{{ SITE_ROOT }}/live/{{word}}");}; </script>
+    <script type="text/javascript">
+      ZeroClipboard.setMoviePath( '{{ static_url("copytoclip/ZeroClipboard.swf") }}' );
+      var clip = null;function init(){
+      clip = new ZeroClipboard.Client();
+      clip.setHandCursor( true );
+      clip.glue( 'd_clip_button', 'd_clip_container' );
+      clip.setText("{{ SITE_ROOT }}/live/{{word}}");}; 
+    </script>
 {% end %}
 
 {% block body %}
@@ -44,7 +50,8 @@
           var t = setTimeout("newRequest()", 1000);
       }
       $("#forkbutton").click(function(){
-          $.post("/fork/{{ word }}", {"body":editor.getValue()}, function(data){document.location = data});
+          $.post("/fork/{{ word }}", {"body":editor.getValue()},
+              function(data){document.location = data});
       });
       $("#revert_button").click(function(){
           $.get("/body/{{ word }}", function(data){
@@ -68,7 +75,8 @@
             count +=1;
 	    if (count === 4) {
                 count = 0;
-	        $.post('/updates/live/' + '{{ word }}', {"body" : editor.getValue(), "poster_id": $("#poster_id").val()});
+	        $.post('/updates/live/' + '{{ word }}', {"body" : editor.getValue(), 
+                   "poster_id": $("#poster_id").val()});
 	    }
         }
       init();

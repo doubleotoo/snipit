@@ -37,9 +37,11 @@ class Application(tornado.web.Application):
 # BEGIN LIVE COLLAB BLOCK
 
 class LiveMixin(object):
-
+    # a list of the callback functions waiting to get called
     waiters = []
+    # a list of all past updates. accessed at LiveMixin.cache
     cache = []
+    # the maximum length of the cache
     cache_size = 200
     
     def wait_for_text(self, callback, wid, cursor=None):
@@ -53,15 +55,21 @@ class LiveMixin(object):
             if recent:
                 callback(recent)
                 return
+
+        # create a new item in LiveMixin.waiters in the format [callback_function, wid_to_limit]
         cls.waiters.append([callback, wid])
 
     def new_text(self, text):
         cls = LiveMixin
+        # start iterating over the callbacks
         for callback in cls.waiters:
             try:
-                for x in text:
-                    if callback[1] == x["wid"]:
-                            callback[0]([x])
+                for item in text:
+                    # if the specified wid_to_limit in the waiters item 
+                    # matches the wid of the new update, this means that 
+                    # this callback should be called, because there are new updates pertaining to it.
+                    if callback[1] == item["wid"]:
+                            callback[0]([item])
             except:
                 logging.error("Error in waiter callback", exc_info=True)
         cls.waiters = []
@@ -73,7 +81,8 @@ class LiveHandler(tornado.web.RequestHandler, LiveMixin):
     @tornado.web.asynchronous
     def get(self, wid):
         snippet = snippets.find_one({'mid':wid})
-        self.render('static/templates/live.html', word=wid, code = snippet['body'], mode=snippet['language'], poster_id=str(uuid.uuid4()))
+        self.render('static/templates/live.html', word=wid, 
+                    code = snippet['body'], mode=snippet['language'], poster_id=str(uuid.uuid4()))
 
     def post(self, wid):
         print wid
