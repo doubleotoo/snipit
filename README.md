@@ -48,4 +48,4 @@ It also uses [MongoDB](http://www.mongodb.org) to store all of the data.
 In the production branch, we implement the [nginx](http://nginx.org) web server to serve static files, and the nginx upload module to handle file uploads.
 
 Our production infrastructure is as follows:
-![Infrastructure Diagram](http://snip.hunterlang.com/static/img/diagram2.png)
+![Infrastructure Diagram](https://github.com/hunterlang/snipit/raw/production/static/img/diagram2.png)
