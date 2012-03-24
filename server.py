@@ -39,9 +39,6 @@ wordnik_request_url = "http://api.wordnik.com/v4/words.json/randomWord?includePa
 # This defines the applications routes
 class Application(tornado.web.Application):
     def __init__(self):
-        # Using the \w "word-match" regex.
-        # The - is because the wordnik words
-        # can have dashes in them.
         handlers = [
 
             (r"/", IndexHandler),
@@ -63,7 +60,6 @@ class Application(tornado.web.Application):
         tornado.web.Application.__init__(self, handlers, autoescape=None, **settings) 
 
 class BaseHandler(tornado.web.RequestHandler):
-    #should i put @tornado.web.asynchronous here?
     def code_mirror_safe_mode(self, language):
         if language == "python":mode = "python"
         elif language == "php":mode = "application/x-httpd-php"
@@ -78,7 +74,6 @@ class BaseHandler(tornado.web.RequestHandler):
         elif language == "objc":mode = "text/x-csrc"
         else: mode="text/plain"
         return mode
-    #should i put @tornado.web.asynchronous here?
     def external_api_request(self, callback, request_url):
         client = tornado.httpclient.AsyncHTTPClient()
         headers = {"Content-Type" : "application/json", "api_key" : VID}
@@ -174,12 +169,6 @@ class ForkHandler(BaseHandler):
 class ViewForksHandler(tornado.web.RequestHandler):
 	@tornado.web.asynchronous
 	def get(self, mid):
-        # We really should look into turning on indexing for the mids.
-        # Mongo automatically indexes the ObjectIds, but it also lets 
-        # you select multiple other indexes. I'll look into that.
-        
-        # 8/19/2011 - I turned on indexing for the mid key.
-        # It's now a B-Tree index. We should see a performance boost.
             fork_list = []
             the_snippet = snippets.find_one({'mid' : mid})
             for thing in the_snippet['forks']:
@@ -187,11 +176,9 @@ class ViewForksHandler(tornado.web.RequestHandler):
                 fork_list.append([snippet['title'], snippet['mid']])
             self.render("static/templates/viewforks.html", forks=fork_list, title=the_snippet['title'])
 
-# BEGIN LIVE COLLAB BLOCK
 class LiveHandler(BaseHandler):
     @tornado.web.asynchronous
-    # This is the only method still needed. All other live-related actions are forwarded to live.py
-    # by nginx.
+
     def get(self, wid):
         self.external_api_request(self.on_response, "http://localhost:9300/updates/cache/" + wid)
 
@@ -207,8 +194,6 @@ class LiveHandler(BaseHandler):
             stored_body = body
         self.render('static/templates/live.html', word=wid, code = stored_body, 
                     mode=snippet['language'], poster_id=str(uuid.uuid4()))
-
-# END LIVE COLLAB BLOCK
 
 class SideHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
@@ -231,8 +216,6 @@ class StatsHandler(tornado.web.RequestHandler):
         self.render("static/templates/stats.html", 
                     top_snippets=top_snippets, total_snippets=total_snippets)
 
-# This class simply returns a JSON object containing
-# the body of a requested snippet.
 class BodyHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def get(self, mid):
