@@ -4,12 +4,12 @@ Snippet Uploader
 General
 -------
 
-This is a very concise tornado application that basically functions as a pastebin.
-However, it has a few defining and unique characteristics.
+This is a tornado application that functions as a pastebin.
+However, it has a few defining characteristics.
 
 *	 <b>Live Collaboration</b>
 
-	 Using the power of [Tornado](http://www.tornadoweb.org/), we made it easy to collaborate in real time on a snippet.
+	 Easy to collaborate in real time on a snippet.
 
 *	 <b>Memorable URL's</b>
 	 
@@ -18,7 +18,7 @@ However, it has a few defining and unique characteristics.
 
 *	 <b>Side-by-side Comparison</b>
 	 
- 	Easily view two snippets right next to each other for maximum comparison functionality.
+ 	View two snippets right next to each other for maximum comparison functionality.
 
 *	 <b>Github-style Forking</b>
 	 
@@ -41,11 +41,11 @@ However, it has a few defining and unique characteristics.
 
 Technology and Infrastructure
 -----------
-Snippet Uploader is built to scale: it uses the [Tornado Web Framework](http://www.tornadoweb.org) to serve dynamic content.
+Snippet Uploader uses the [Tornado Web Framework](http://www.tornadoweb.org) to serve dynamic content.
 
-We also use [MongoDB](http://www.mongodb.org) to store all of our data.
+It also uses [MongoDB](http://www.mongodb.org) to store all of the data.
 
 In the production branch, we implement the [nginx](http://nginx.org) web server to serve static files, and the nginx upload module to handle file uploads.
 
-Our infrastructure is as follows:
+Our production infrastructure is as follows:
 ![Infrastructure Diagram](http://snip.hunterlang.com/static/img/diagram2.png)
